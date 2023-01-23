@@ -43,13 +43,9 @@ def get_async_engine() -> AsyncEngine:
     )
 
 
-def get_session() -> sessionmaker:
-    return sessionmaker(
-        autocommit=False, autoflush=False, bind=get_engine(), future=True
-    )
-
-
-def get_async_session() -> sessionmaker:
-    return sessionmaker(
-        get_async_engine(), class_=AsyncSession, expire_on_commit=False
-    )
+SessionLocal = sessionmaker(
+    autocommit=False, autoflush=False, bind=get_engine(), future=True
+)
+AsyncSessionLocal = sessionmaker(
+    bind=get_async_engine(), class_=AsyncSession, expire_on_commit=False
+)
