@@ -10,10 +10,10 @@ from fastapi.security import (
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, ValidationError
-from config import get_settings
+from app.core.config import get_app_settings
 
 
-settings = get_settings()
+settings = get_app_settings()
 
 fake_users_db = {
     "johndoe": {
