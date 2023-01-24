@@ -9,7 +9,7 @@ class UserBaseSerializer(BaseModel):
     last_name: str | None = None
     phone: str
     email: EmailStr
-    is_verified: bool | None = False
+    is_active: bool | None = False
 
 
 class UserCreateSerializer(UserBaseSerializer):
