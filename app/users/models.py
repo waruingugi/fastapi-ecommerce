@@ -12,7 +12,7 @@ class User(Base):
     phone: Mapped[str] = Column(String, nullable=False, index=True)
     email: str = Column(String, unique=True, index=True, nullable=False)
     password: str = Column(String, nullbale=False)
-    is_active: bool = Column(Boolean, default=False)
+    is_active: bool = Column(Boolean, default=True, server_default=True())
     user_type: str = Column(
         Enum(UserTypes),
         default=UserTypes.CUSTOMER.value

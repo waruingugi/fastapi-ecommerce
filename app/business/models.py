@@ -13,8 +13,8 @@ class Business(Base):
     )
     email: str = Column(String, nullable=True)
     phone: Mapped[str] = Column(String, unique=True, nullable=False, index=True)
-    is_verified: bool = Column(Boolean, default=false)
-    is_physical: bool = Column(Boolean, default=False)
+    is_verified: bool = Column(Boolean, default=False, server_default=False())
+    is_physical: bool = Column(Boolean, default=False, server_default=False())
     verification_state: str = Column(
         Enum(BusinessVerificationStates),
         default=BusinessVerificationStates.PENDING.value,

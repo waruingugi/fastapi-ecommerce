@@ -11,24 +11,33 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, ValidationError
 from app.core.config import get_app_settings
-
+from datetime import datetime
+from app.users.serailizers.user import UserBaseSerializer, UserCreateSerializer
 
 settings = get_app_settings()
 
 fake_users_db = {
-    "johndoe": {
-        "username": "johndoe",
-        "full_name": "John Doe",
+    "254704845045": {
+        "id": "a",
+        "first_name": "John",
+        "last_name": "Doe",
         "email": "johndoe@example.com",
-        "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
-        "disabled": False,
+        "phone": "254704845045",
+        "password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "is_active": True,
+        "user_type": "ADMIN",
+        "date_joined": datetime.strptime('26 Sep 2012', '%d %b %Y')
     },
-    "alice": {
-        "username": "alice",
-        "full_name": "Alice Chains",
-        "email": "alicechains@example.com",
-        "hashed_password": "$2b$12$gSvqqUPvlXP2tfVFaWK1Be7DlH.PKZbv5H8KnzzVgXXbVxpva.pFm",
-        "disabled": True,
+    "254704845043": {
+        "id": "b",
+        "first_name": "Alice",
+        "last_name": "Homes",
+        "email": "alice@example.com",
+        "phone": "254704845043",
+        "password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+        "is_active": False,
+        "user_type": "CUSTOMER",
+        "date_joined": datetime.strptime('26 Sep 2012', '%d %b %Y')
     },
 }
 
@@ -39,19 +48,19 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Union[str, None] = None
+    phone: Union[str, None] = None
     scopes: List[str] = []
 
 
 class User(BaseModel):
-    username: str
+    phone: str
     email: Union[str, None] = None
-    full_name: Union[str, None] = None
-    disabled: Union[bool, None] = None
+    first_name: Union[str, None] = None
+    is_active: Union[bool, None] = None
 
 
 class UserInDB(User):
-    hashed_password: str
+    password: str
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -71,17 +80,17 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def get_user(db, username: str):
-    if username in db:
-        user_dict = db[username]
+def get_user(db, phone: str):
+    if phone in db:
+        user_dict = db[phone]
         return UserInDB(**user_dict)
 
 
-def authenticate_user(fake_db, username: str, password: str):
-    user = get_user(fake_db, username)
+def authenticate_user(fake_db, phone: str, password: str):
+    user = get_user(fake_db, phone)
     if not user:
         return False
-    if not verify_password(password, user.hashed_password):
+    if not verify_password(password, user.password):
         return False
     return user
 
@@ -116,17 +125,17 @@ async def get_current_user(
 
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        phone: str = payload.get("sub")
+        if phone is None:
             raise credentials_exception
 
         token_scopes = payload.get("scopes", [])
-        token_data = TokenData(scopes=token_scopes, username=username)
+        token_data = TokenData(scopes=token_scopes, phone=phone)
 
     except (JWTError, ValidationError):
         raise credentials_exception
 
-    user = get_user(fake_users_db, username=token_data.username)
+    user = get_user(fake_users_db, phone=token_data.phone)
 
     if user is None:
         raise credentials_exception
@@ -145,7 +154,7 @@ async def get_current_user(
 async def get_current_active_user(
     current_user: User = Security(get_current_user, scopes=["me"])
 ):
-    if current_user.disabled:
+    if not current_user.is_active:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user
 
@@ -155,11 +164,11 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     user = authenticate_user(fake_users_db, form_data.username, form_data.password)
 
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect username or password")
+        raise HTTPException(status_code=400, detail="Incorrect phone or password")
 
     access_token_expires = timedelta(seconds=settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS)
     access_token = create_access_token(
-        data={"sub": user.username, "scopes": form_data.scopes},
+        data={"sub": user.phone, "scopes": form_data.scopes},
         expires_delta=access_token_expires,
     )
 
@@ -167,7 +176,9 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
 
 
 @app.get("/users/me/", response_model=User)
-async def read_users_me(current_user: User = Depends(get_current_active_user)):
+async def read_users_me(
+    current_user: User = Depends(get_current_active_user)
+):
     return current_user
 
 
@@ -181,3 +192,11 @@ async def read_own_items(
 @app.get("/status/")
 async def read_system_status(current_user: User = Depends(get_current_user)):
     return {"status": "ok"}
+
+
+@app.patch("/users/update", response_model=UserBaseSerializer)
+def update_user(
+    user: UserCreateSerializer,
+    _: User = Security(get_current_active_user, scopes=["items"])
+):
+    return user

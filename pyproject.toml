@@ -17,6 +17,8 @@ sqlalchemy = "^1.4.46"
 psycopg2-binary = "^2.9.5"
 asyncpg = "^0.27.0"
 tenacity = "^8.1.0"
+phonenumbers = "^8.13.4"
+pydantic = {extras = ["email"], version = "^1.10.4"}
 
 
 [build-system]
