@@ -1,7 +1,7 @@
 from sqlalchemy import Column, ForeignKey, String, Boolean, Index, DateTime
 from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base
-from app.business.constants import BusinessTypes, BusinessVerificationStates
+from app.business_partner.constants import BusinessTypes, BusinessVerificationStates
 from enum import Enum
 
 

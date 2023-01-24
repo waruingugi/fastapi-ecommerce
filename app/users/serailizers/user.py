@@ -1,20 +1,21 @@
 from pydantic import BaseModel, EmailStr, validator
 from app.users.constants import UserTypes
-from enum import Enum
 from app.core.helpers import capitalize_fields, validate_phone_number
-from datetime import datetime
+from app.db.serializer import InDBBaseSerializer
+
 
 class UserBaseSerializer(BaseModel):
-    first_name: str | None = None
-    last_name: str | None = None
-    phone: str
-    email: EmailStr
-    is_active: bool | None = False
+    first_name: str | None
+    last_name: str | None
+    phone: str | None
+    email: EmailStr | None
+    is_active: bool = False
 
 
 class UserCreateSerializer(UserBaseSerializer):
+    phone: str
     user_type: str = UserTypes.CUSTOMER.value
-    password: str | None = None
+    password: str
 
     _capitalize_fields = validator("first_name", "last_name", pre=True, allow_reuse=True)(
         capitalize_fields
@@ -25,15 +26,19 @@ class UserCreateSerializer(UserBaseSerializer):
     )
 
 
-class UserActivateSerializer(UserCreateSerializer):
-    is_active: bool = True
+class UserActivateDeactivateSerializer(UserBaseSerializer):
+    is_active: bool
 
 
 class UserUpdateSerializer(UserBaseSerializer):
-    password: str | None = None
+    user_type: str | None
+    password: str | None
 
 
-class UserInDBSerializer(UserBaseSerializer):
-    id: str
+class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
+    date_joined: str
     password: str
     user_type: str
+
+    class Config:
+        orm_mode = True
