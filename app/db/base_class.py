@@ -1,5 +1,6 @@
-from sqlalchemy.ext.declarative import declarative_base, declared_attr, Mapped
+from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, DateTime, String
+from sqlalchemy.orm import Mapped
 
 
 import uuid
