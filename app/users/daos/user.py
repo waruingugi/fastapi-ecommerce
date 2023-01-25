@@ -23,6 +23,6 @@ class UserDao(CRUDBase[User, UserCreateSerializer, UserUpdateSerializer]):
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def is_superuser(self, user: User) -> bool:
-        return user.user_type is UserTypes.ADMIN.value
+        return user.user_type is UserTypes.SUPERADMIN.value
 
 user_dao = UserDao(User)
