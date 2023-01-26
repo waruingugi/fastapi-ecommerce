@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 from sqlalchmey import Column, insert, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import get_hybrid_properties
+from sqlalchemy.future import select
 
 from datetime import datetime
 
@@ -30,7 +31,7 @@ ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
 
-# START
+
 # Class that we can use to keep track of the changes in an object
 class ChangeAttrState(TypedDict):
     before: Any
@@ -42,7 +43,7 @@ ChangedObjState = Dict[str, ChangeAttrState]
 
 class DaoInterface(Protocol[ModelType]):
     """
-    Parent class uses ´Protocol´ which ensures child classes inherit the same type.
+    Parent class uses ´Protocol´ which ensures child classes inherit the same functions or structure.
     """
     model: ModelType
 
@@ -267,52 +268,109 @@ class DeleteDao(Generic[ModelType]):
         return None
 
 
-# END
-class CRUDBase(Generic[ModelType, CreateSerializer, UpdateSerializer]):
-    def __init__(self, model: Type[ModelType]):
-        """
-        CRUD object with default methods to Create, Read, Update, Delete (CRUD)
-        """
+class ReadDao(Generic[ModelType]):
+    def __init__(
+        self,
+        model: Type[ModelType],
+        *,
+        **kwargs: Any,
+    ):
+        super(ReadDao, self).__init__(model, **kwargs)
         self.model = model
 
-    def get(self, db: Session, id: str | int) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+    def get(
+        self: Union[Any, DaoInterface],
+        db: Session,
+    ) -> Optional[ModelType]:
+        query = select(self.model)
+        return db.scalars(query).first()
 
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
-
-    def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
-        obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-    
-    def update(
-        self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSerializer, Dict[str, Any]]
+    def get_not_none(
+        self,
+        db: Session
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
-        if isinstance(obj_in, dict):
-            update_data = obj_in
-        else:
-            update_data = obj_in.dict(exclude_unset=True)
-
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
-
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-
-        return db_obj
-
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
-        db.delete(obj)
-
-        db.commit()
+        obj = self.get(db)
+        if not obj:
+            raise  # raise custom exception here
         return obj
+
+    def get_all(
+        self,
+        db: Session,
+    ) -> List[ModelType]:
+        query = select(self.model)
+        return db.scalars(query).all()
+
+    def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
+        query = select(self.model)
+        return db.scalars(query.where(self.model.id.in_(ids))).all()
+    
+    def exists(self, db: Session, id: str) -> bool:
+        return (
+            db.scalars(select(self.model.id).filter_by(id=id).limit(1)).first()
+        )
+
+
+class CRUDDao(
+    CreateDao[ModelType, CreateSerializer],
+    UpdateDao[ModelType, UpdateSerializer],
+    DeleteDao[ModelType],
+    ReadDao[ModelType]
+):
+    def __init__(
+        self,
+        model: Type[ModelType]
+    ):
+        super(CRUDDao, self).__init__(model)
+# END
+
+
+
+# class CRUDBase(Generic[ModelType, CreateSerializer, UpdateSerializer]):
+#     def __init__(self, model: Type[ModelType]):
+#         """
+#         CRUD object with default methods to Create, Read, Update, Delete (CRUD)
+#         """
+#         self.model = model
+
+#     def get(self, db: Session, id: str | int) -> Optional[ModelType]:
+#         return db.query(self.model).filter(self.model.id == id).first()
+
+#     def get_multi(
+#         self, db: Session, *, skip: int = 0, limit: int = 100
+#     ) -> List[ModelType]:
+#         return db.query(self.model).offset(skip).limit(limit).all()
+
+#     def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
+#         obj_in_data = jsonable_encoder(obj_in)
+#         db_obj = self.model(**obj_in_data)
+#         db.add(db_obj)
+#         db.commit()
+#         db.refresh(db_obj)
+#         return db_obj
+    
+#     def update(
+#         self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSerializer, Dict[str, Any]]
+#     ) -> ModelType:
+#         obj_data = jsonable_encoder(db_obj)
+#         if isinstance(obj_in, dict):
+#             update_data = obj_in
+#         else:
+#             update_data = obj_in.dict(exclude_unset=True)
+
+#         for field in obj_data:
+#             if field in update_data:
+#                 setattr(db_obj, field, update_data[field])
+
+#         db.add(db_obj)
+#         db.commit()
+#         db.refresh(db_obj)
+
+#         return db_obj
+
+#     def remove(self, db: Session, *, id: int) -> ModelType:
+#         obj = db.query(self.model).get(id)
+#         db.delete(obj)
+
+#         db.commit()
+#         return obj
