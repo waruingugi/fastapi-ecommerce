@@ -2,16 +2,15 @@ from typing import Optional, Union, Any, Dict
 
 from sqlalchemy.orm import Session
 
-from app.db.dao import CRUDBase
+from app.db.dao import CRUDDao
 from app.users.models import User
-from app.users.serailizers.user import UserCreateSerializer, UserUpdateSerializer
+from app.users.serializers.user import UserCreateSerializer, UserUpdateSerializer
 from app.users.constants import UserTypes
 
-class UserDao(CRUDBase[User, UserCreateSerializer, UserUpdateSerializer]):
+class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
-
-    
+ 
     def update(
         self, db: Session, *, db_obj: User, obj_in: Union[UserUpdateSerializer, Dict[str, Any]]
     ) -> User:

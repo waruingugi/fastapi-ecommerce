@@ -14,7 +14,7 @@ from typing import (
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchmey import Column, insert, inspect, update
+from sqlalchemy import Column, insert, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import get_hybrid_properties
 from sqlalchemy.future import select
@@ -90,12 +90,12 @@ class DaoInterface(Protocol[ModelType]):
 
 
 class CreateDao(Generic[ModelType, CreateSerializer]):
-    def __init__(self, model: Type[ModelType], **kwargs: Any):
-        super(CreateDao, self).__init__(model, **kwargs)
+    def __init__(self, model: Type[ModelType]):
+        # super(CreateDao, self).__init__(model)
         self.model = model
 
     def create(
-        self: Union[Any, DaoInterface], db: Session, *, obj_in: CreateSerializer
+        self: Union[Any, DaoInterface], db: Session, obj_in: CreateSerializer
     ) -> ModelType:
         obj_in_data = obj_in.dict(exclude_none=True)
         orig_data = obj_in_data.copy()
@@ -144,9 +144,9 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
 
 
 class UpdateDao(Generic[ModelType, UpdateSerializer]):
-    def __init__(self, model: Type[ModelType], **kwargs: Any):
+    def __init__(self, model: Type[ModelType]):
         self.model = model
-        super(UpdateDao, self).__init__(model, **kwargs)
+        # super(UpdateDao, self).__init__()
 
     def update(
         self: Union[Any, DaoInterface],
@@ -249,9 +249,8 @@ class DeleteDao(Generic[ModelType]):
     def __init__(
         self,
         model: Type[ModelType],
-        **kwargs: Any
     ):
-        super(DeleteDao, self).__init__(model, **kwargs)
+        # super(DeleteDao, self).__init__()
         self.model = model
 
     def on_post_delete(self, db: Session, db_obj: ModelType) -> None:
@@ -272,10 +271,7 @@ class ReadDao(Generic[ModelType]):
     def __init__(
         self,
         model: Type[ModelType],
-        *,
-        **kwargs: Any,
     ):
-        super(ReadDao, self).__init__(model, **kwargs)
         self.model = model
 
     def get(
@@ -321,7 +317,7 @@ class CRUDDao(
         self,
         model: Type[ModelType]
     ):
-        super(CRUDDao, self).__init__(model)
+        super().__init__(model)
 # END
 
 

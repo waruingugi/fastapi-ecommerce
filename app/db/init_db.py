@@ -2,7 +2,7 @@ import logging
 from sqlalchemy.orm import Session
 
 from app.users.daos.user import user_dao
-from app.users.serailizers.user import UserCreateSerializer
+from app.users.serializers.user import UserCreateSerializer
 from app.users.constants import UserTypes
 from app.db import base  # noqa
 
