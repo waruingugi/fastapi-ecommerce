@@ -4,6 +4,7 @@ from app.db.base_class import Base, get_current_datetime
 from app.users.constants import UserTypes
 from enum import Enum
 from typing import List
+from app.business_partner.models import Business
 
 
 class User(Base):

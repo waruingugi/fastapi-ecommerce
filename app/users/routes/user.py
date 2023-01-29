@@ -1,19 +1,20 @@
 import fastapi
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from app.users.serailizers.users import UserInDBSerializer
-from sqlalchemy.ext.asyncio import AsyncSession
-from app.core.deps import get_async_db
-from app.users.daos.user import UserDao
+from app.users.serializers.user import UserInDBSerializer
+from sqlalchemy.orm import Session
+from app.core.deps import get_db
+from app.users.daos.user import user_dao
+from typing import Any
 
 
 router = fastapi.APIRouter()
 
 
 @router.get("/", response_model=UserInDBSerializer)
-async def read_users(
-    db: AsyncSession = Depends(get_async_db),
-    user_dao: Depends(UserDao)
-):
+async def rget_all_users(
+    db: Session = Depends(get_db),
+) -> Any:
     """Retrieve users"""
-    pass
+    return user_dao.get_all(db)
+

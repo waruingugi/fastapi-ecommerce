@@ -1,62 +1,372 @@
-from typing import Any, Dict, Generic, List, Optional, Type, TypeVar, Union
+from typing import (
+    Any,
+    Dict,
+    Generic,
+    List,
+    Optional,
+    Type,
+    TypeVar,
+    Union,
+    Protocol,
+    TypedDict
+)
 
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
+from sqlalchemy import Column, insert, inspect, update
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy_utils import get_hybrid_properties
+from sqlalchemy.future import select
 
-from app.db.base_class import Base
+from datetime import datetime
+
+from app.db.base_class import Base, generate_uuid
+from app.exceptions.custom import HttpErrorException
+from app.errors.custom import ErrorCodes
+from http import HTTPStatus
 
 
 ModelType = TypeVar("ModelType", bound=Base)
-CreateSchemaType = TypeVar("CreateSchemaType", bound=BaseModel)
-UpdateSchemaType = TypeVar("UpdateSchemaType", bound=BaseModel)
+CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
+UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
 
 
-class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
+# Class that we can use to keep track of the changes in an object
+class ChangeAttrState(TypedDict):
+    before: Any
+    after: Any
+
+
+ChangedObjState = Dict[str, ChangeAttrState]
+
+
+class DaoInterface(Protocol[ModelType]):
+    """
+    Parent class uses ´Protocol´ which ensures child classes inherit the same functions or structure.
+    """
+    model: ModelType
+
+    def on_relationship(
+        self,
+        db: Session,
+        *,
+        pk: str,
+        values: dict,
+        db_obj: Optional[ModelType] = None,
+        create: bool = True
+    ) -> None:
+        pass
+
+    def get_not_none(
+        self,
+        db: Session,
+        **filters: Any
+    ) -> ModelType:
+        pass
+    
+    def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
+        pass
+
+    def get(self, db: Session, **filters: Any) -> Optional[ModelType]:
+        pass
+
+    def get_or_none(self, db: Session, **filters: Any) -> ModelType:
+        pass
+
+    def on_pre_create(self, db: Session, pk: str, values: dict, orig_values: dict) -> None:
+        pass
+
+    def on_post_create(self, db: Session, db_obj: Union[ModelType, List[ModelType]]) -> None:
+        pass
+
+    def on_pre_update(self, db: Session, db_obj: ModelType, values: dict, orig_values: dict) -> None:
+        pass
+
+    def on_post_update(
+        self, db: Session, db_obj: ModelType, changed: ChangedObjState
+    ) -> None:
+        pass
+
+
+class CreateDao(Generic[ModelType, CreateSerializer]):
     def __init__(self, model: Type[ModelType]):
-        """
-        CRUD object with default methods to Create, Read, Update, Delete (CRUD)
-        """
+        # super(CreateDao, self).__init__(model)
         self.model = model
 
-    def get(self, db: Session, id: str | int) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
-
-    def get_multi(
-        self, db: Session, *, skip: int = 0, limit: int = 100
-    ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
-
-    def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
-        obj_in_data = jsonable_encoder(obj_in)
-        db_obj = self.model(**obj_in_data)
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
-        return db_obj
-    
-    def update(
-        self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSchemaType, Dict[str, Any]]
+    def create(
+        self: Union[Any, DaoInterface], db: Session, obj_in: CreateSerializer
     ) -> ModelType:
-        obj_data = jsonable_encoder(db_obj)
+        obj_in_data = obj_in.dict(exclude_none=True)
+        orig_data = obj_in_data.copy()
+
+        relationship_fields = inspect(self.model).relationships.keys()
+
+        for key in list(obj_in_data.keys()):
+            if (
+                isinstance(obj_in_data[key], list)
+                or key in relationship_fields
+                or obj_in_data[key] is None
+                or key not in self.model.get_model_columns()
+            ):
+                del obj_in_data[key]
+
+        try:
+            obj_id = obj_in_data.pop("id", None) or generate_uuid()
+            if hasattr(self, "on_pre_create"):
+                self.on_pre_create(
+                    db, pk=obj_id, values=obj_in_data, orig_values=orig_data
+                )
+
+            stmt = insert(self.model.__table__).values(id=obj_id, **obj_in_data)
+            db.execute(stmt)
+
+            if hasattr(self, "on_relationship"):
+                self.on_relationship(db, pk=obj_id, values=orig_data)
+            
+            db.commit()
+            db_obj = self.get_not_none(db, id=obj_id)
+            self.on_post_create(db, db_obj)
+
+            return db_obj
+        except IntegrityError as integrity_error:
+            db.rollback()
+
+    def on_pre_create(
+        self, db: Session, pk: str, values: dict, orig_values: dict
+    ) -> None:
+        pass
+
+    def on_post_create(
+        self, db: Session, db_obj: Union[ModelType, List[ModelType]]
+    ) -> None:
+        pass
+
+
+class UpdateDao(Generic[ModelType, UpdateSerializer]):
+    def __init__(self, model: Type[ModelType]):
+        self.model = model
+        # super(UpdateDao, self).__init__()
+
+    def update(
+        self: Union[Any, DaoInterface],
+        db: Session,
+        *,
+        db_obj: ModelType,
+        obj_in: Union[UpdateSerializer, Dict[str, Any]]
+    ) -> ModelType:
         if isinstance(obj_in, dict):
             update_data = obj_in
+
         else:
             update_data = obj_in.dict(exclude_unset=True)
 
-        for field in obj_data:
-            if field in update_data:
-                setattr(db_obj, field, update_data[field])
+        if not update_data:
+            raise HttpErrorException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                error_code=ErrorCodes.NO_CHANGES_DETECTED.name,
+                error_message=ErrorCodes.NO_CHANGES_DETECTED.value
+            )
 
-        db.add(db_obj)
-        db.commit()
-        db.refresh(db_obj)
+        if "created_at" in update_data:
+            del update_data["created_at"]
+        
+        if not hasattr(db_obj, "updated_at"):
+            update_data["update_at"] = datetime.now()
 
-        return db_obj
+        hybrid_property_fields = get_hybrid_properties(self.model).keys()
+        relationship_fields = inspect(self.model).relationships.keys()
 
-    def remove(self, db: Session, *, id: int) -> ModelType:
-        obj = db.query(self.model).get(id)
-        db.delete(obj)
+        orig_update_data = update_data.copy()
 
-        db.commit()
+        for key in list(update_data.keys()):
+            if (
+                key in hybrid_property_fields
+                or key in relationship_fields
+                or key not in db_obj.get_model_columns()
+                or update_data[key] is None
+            ):
+                del update_data[key]
+
+        self.on_pre_update(
+            db=db, db_obj=db_obj, values=update_data, orig_values=orig_update_data
+        )
+
+        # We need to keep track of attributes we are about to change
+        changed_obj_state: ChangedObjState = {}
+        for key in list(update_data.keys()):
+            if key == "updated_at":
+                continue
+
+            if key in db_obj.get_model_columns():
+                # Field has the same values, so we delete it
+                if update_data[key] == getattr(db_obj, key):
+                    del update_data[key]
+
+                # Field has changed, so we track it
+                else:
+                    changed_obj_state[key] = {
+                        "before": getattr(db_obj, key),
+                        "after": update_data[key],
+                    }
+
+        stmt = (
+            update(self.model.__table__)
+            .wher(self.model.id == db_obj.id)
+            .values(**update_data)
+            .execution_options(synchronize_session="fetch")
+        )
+        db.execute(stmt)
+
+        if hasattr(self, "on_relationship"):
+            self.on_relationship(
+                db, pk=db_obj.id, values=orig_update_data, db_obj=db_obj, create=False
+            )
+
+        try:
+            db.commit()
+            
+            updated_db_obj = self.get_not_none(db, id=db_obj.id)
+            self.on_post_update(db, updated_db_obj, changed_obj_state)
+
+            return updated_db_obj
+        except IntegrityError as integrity_error:
+            db.rollback()
+            raise
+
+    def on_pre_update(
+        self, db: Session, db_obj: ModelType, values: dict, orig_values: dict 
+    ) -> None:
+        pass
+
+    def on_post_update(
+        self, db: Session, db_obj: ModelType, changed: ChangedObjState
+    ) -> None:
+        pass
+
+
+class DeleteDao(Generic[ModelType]):
+    def __init__(
+        self,
+        model: Type[ModelType],
+    ):
+        # super(DeleteDao, self).__init__()
+        self.model = model
+
+    def on_post_delete(self, db: Session, db_obj: ModelType) -> None:
+        pass
+
+    def remove(self, db: Session, *, id: str) -> Optional[ModelType]:
+        obj = db.get(self.model, id)
+        if obj:
+            db.delete(obj)
+            db.commit()
+            self.on_post_delete(db, obj)
+            return obj
+
+        return None
+
+
+class ReadDao(Generic[ModelType]):
+    def __init__(
+        self,
+        model: Type[ModelType],
+    ):
+        self.model = model
+
+    def get(
+        self: Union[Any, DaoInterface],
+        db: Session,
+    ) -> Optional[ModelType]:
+        query = select(self.model)
+        return db.scalars(query).first()
+
+    def get_not_none(
+        self,
+        db: Session
+    ) -> ModelType:
+        obj = self.get(db)
+        if not obj:
+            raise  # raise custom exception here
         return obj
+
+    def get_all(
+        self,
+        db: Session,
+    ) -> List[ModelType]:
+        query = select(self.model)
+        return db.scalars(query).all()
+
+    def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
+        query = select(self.model)
+        return db.scalars(query.where(self.model.id.in_(ids))).all()
+    
+    def exists(self, db: Session, id: str) -> bool:
+        return (
+            db.scalars(select(self.model.id).filter_by(id=id).limit(1)).first()
+        )
+
+
+class CRUDDao(
+    CreateDao[ModelType, CreateSerializer],
+    UpdateDao[ModelType, UpdateSerializer],
+    DeleteDao[ModelType],
+    ReadDao[ModelType]
+):
+    def __init__(
+        self,
+        model: Type[ModelType]
+    ):
+        super().__init__(model)
+# END
+
+
+
+# class CRUDBase(Generic[ModelType, CreateSerializer, UpdateSerializer]):
+#     def __init__(self, model: Type[ModelType]):
+#         """
+#         CRUD object with default methods to Create, Read, Update, Delete (CRUD)
+#         """
+#         self.model = model
+
+#     def get(self, db: Session, id: str | int) -> Optional[ModelType]:
+#         return db.query(self.model).filter(self.model.id == id).first()
+
+#     def get_multi(
+#         self, db: Session, *, skip: int = 0, limit: int = 100
+#     ) -> List[ModelType]:
+#         return db.query(self.model).offset(skip).limit(limit).all()
+
+#     def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
+#         obj_in_data = jsonable_encoder(obj_in)
+#         db_obj = self.model(**obj_in_data)
+#         db.add(db_obj)
+#         db.commit()
+#         db.refresh(db_obj)
+#         return db_obj
+    
+#     def update(
+#         self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSerializer, Dict[str, Any]]
+#     ) -> ModelType:
+#         obj_data = jsonable_encoder(db_obj)
+#         if isinstance(obj_in, dict):
+#             update_data = obj_in
+#         else:
+#             update_data = obj_in.dict(exclude_unset=True)
+
+#         for field in obj_data:
+#             if field in update_data:
+#                 setattr(db_obj, field, update_data[field])
+
+#         db.add(db_obj)
+#         db.commit()
+#         db.refresh(db_obj)
+
+#         return db_obj
+
+#     def remove(self, db: Session, *, id: int) -> ModelType:
+#         obj = db.query(self.model).get(id)
+#         db.delete(obj)
+
+#         db.commit()
+#         return obj

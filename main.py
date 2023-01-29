@@ -12,7 +12,12 @@ from passlib.context import CryptContext
 from pydantic import BaseModel, ValidationError
 from app.core.config import get_app_settings
 from datetime import datetime
-from app.users.serailizers.user import UserBaseSerializer, UserCreateSerializer
+from app.users.serializers.user import UserBaseSerializer, UserCreateSerializer
+#serializers.user import UserBaseSerializer, UserCreateSerializer
+from app.core.deps import get_async_db, get_db
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import Session
+import fastapi
 
 settings = get_app_settings()
 
@@ -71,6 +76,9 @@ oauth2_scheme = OAuth2PasswordBearer(
 )
 
 app = FastAPI()
+from app.users.routes import user
+router = fastapi.APIRouter()
+router.include_router(user.router, prefix="/users")
 
 def verify_password(plain_password, hashed_password):
     return pwd_context.verify(plain_password, hashed_password)
@@ -190,8 +198,12 @@ async def read_own_items(
 
 
 @app.get("/status/")
-async def read_system_status(current_user: User = Depends(get_current_user)):
-    return {"status": "ok"}
+async def read_system_status(
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)):
+    from app.users.daos.user import user_dao
+    return user_dao.get_all(db)
+    # return {"status": "ok"}
 
 
 @app.patch("/users/update", response_model=UserBaseSerializer)
