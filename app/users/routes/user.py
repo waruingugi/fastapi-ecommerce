@@ -11,6 +11,7 @@ from typing import Any, List
 router = fastapi.APIRouter()
 
 
+
 @router.get("/", response_model=List[UserInDBSerializer])
 async def get_all_users(
     db: Session = Depends(get_db),
