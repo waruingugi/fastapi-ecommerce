@@ -10,7 +10,7 @@ def get_application() -> FastAPI:
     application: Any = FastAPI(
         title=settings.PROJECT_NAME,
         description="""
-            Learning FastAPI by building industry grade application.
+            Learning FastAPI by building an industry grade application.
         """,
         version=settings.API_VERSION
     )
