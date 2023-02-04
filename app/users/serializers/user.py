@@ -2,6 +2,7 @@ from pydantic import BaseModel, EmailStr, validator
 from app.users.constants import UserTypes
 from app.core.helpers import capitalize_fields, validate_phone_number
 from app.db.serializer import InDBBaseSerializer
+from datetime import datetime
 
 
 class UserBaseSerializer(BaseModel):
@@ -36,9 +37,8 @@ class UserUpdateSerializer(UserBaseSerializer):
 
 
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
-    date_joined: str
-    password: str
     user_type: str
+    date_joined: datetime
 
     class Config:
         orm_mode = True
