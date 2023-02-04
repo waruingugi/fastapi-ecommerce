@@ -8,6 +8,10 @@ from pydantic import (
 
 
 class Settings(BaseSettings):
+    PROJECT_NAME: str = "Ecommerce API"
+    API_VERSION: str = "0.0.1"
+    API_V1_STR: str = "/api/v1"
+
     SECRET_KEY : str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 24
