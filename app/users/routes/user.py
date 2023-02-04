@@ -12,7 +12,7 @@ router = fastapi.APIRouter()
 
 
 @router.get("/", response_model=UserInDBSerializer)
-async def rget_all_users(
+async def get_all_users(
     db: Session = Depends(get_db),
 ) -> Any:
     """Retrieve users"""

@@ -8,6 +8,7 @@ from pydantic import (
 
 
 class Settings(BaseSettings):
+    API_V1_STR: str = "/api/v1"
     SECRET_KEY : str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 24
