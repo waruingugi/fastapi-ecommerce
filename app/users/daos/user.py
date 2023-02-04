@@ -10,7 +10,10 @@ from app.users.constants import UserTypes
 class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
- 
+
+    def get_by_phone(self, db: Session, *, phone: str) -> Optional[User]:
+        return db.query(User).filter(User.phone == phone).first()
+
     def update(
         self, db: Session, *, db_obj: User, obj_in: Union[UserUpdateSerializer, Dict[str, Any]]
     ) -> User:
