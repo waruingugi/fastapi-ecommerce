@@ -8,7 +8,7 @@ from fastapi.security import (
 )
 from fastapi import Depends, FastAPI, HTTPException, Security, status
 from app.core.config import get_app_settings
-from app.auth.serializers.auth import TokenData
+# from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
 from pydantic import ValidationError
 from app.users.daos.user import user_dao
@@ -20,11 +20,6 @@ from app.users.serializers.user import UserBaseSerializer
 settings = get_app_settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="token",
-    scopes={"me": "Read information about the current user.", "items": "Read items."},
-)
 
 
 def verify_password(plain_password: str, hashed_password: str):
@@ -51,52 +46,52 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     return encoded_jwt
 
 
-async def get_current_user(
-    db: Session = Depends(get_db),
-    security_scopes: SecurityScopes,
-    token: str = Depends(oauth2_scheme)
-):
-    if security_scopes.scopes:
-        authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
-    else:
-        authenticate_value = "Bearer"
+# async def get_current_user(
+#     db: Session = Depends(get_db),
+#     security_scopes: SecurityScopes,
+#     token: str = Depends(oauth2_scheme)
+# ):
+#     if security_scopes.scopes:
+#         authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
+#     else:
+#         authenticate_value = "Bearer"
 
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": authenticate_value},
-    )
+#     credentials_exception = HTTPException(
+#         status_code=status.HTTP_401_UNAUTHORIZED,
+#         detail="Could not validate credentials",
+#         headers={"WWW-Authenticate": authenticate_value},
+#     )
 
-    try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        phone: str = payload.get("sub")
-        if phone is None:
-            raise credentials_exception
+#     try:
+#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+#         phone: str = payload.get("sub")
+#         if phone is None:
+#             raise credentials_exception
 
-        token_scopes = payload.get("scopes", [])
-        token_data = TokenData(scopes=token_scopes, phone=phone)
+#         token_scopes = payload.get("scopes", [])
+#         token_data = TokenData(scopes=token_scopes, phone=phone)
 
-    except (JWTError, ValidationError):
-        raise credentials_exception
+#     except (JWTError, ValidationError):
+#         raise credentials_exception
 
-    user = user_dao.get_by_phone(db, phone=token_data.phone)
+#     user = user_dao.get_by_phone(db, phone=token_data.phone)
 
-    if user is None:
-        raise credentials_exception
+#     if user is None:
+#         raise credentials_exception
 
-    for scope in security_scopes.scopes:
-        if scope not in token_data.scopes:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Not enough permissions",
-                headers={"WWW-Authenticate": authenticate_value},
-            )
+#     for scope in security_scopes.scopes:
+#         if scope not in token_data.scopes:
+#             raise HTTPException(
+#                 status_code=status.HTTP_401_UNAUTHORIZED,
+#                 detail="Not enough permissions",
+#                 headers={"WWW-Authenticate": authenticate_value},
+#             )
 
-    return user
+#     return user
 
-async def get_current_active_user(
-    current_user: UserBaseSerializer = Security(get_current_user, scopes=["me"])
-):
-    if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+# async def get_current_active_user(
+#     current_user: UserBaseSerializer = Security(get_current_user, scopes=["me"])
+# ):
+#     if not current_user.is_active:
+#         raise HTTPException(status_code=400, detail="Inactive user")
+#     return current_user
