@@ -17,4 +17,3 @@ async def get_all_users(
 ) -> Any:
     """Retrieve users"""
     return user_dao.get_all(db)
-
