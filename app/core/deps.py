@@ -37,8 +37,8 @@ async def get_async_db() -> AsyncGenerator:
 
 
 async def get_current_user(
-    db: Session = Depends(get_db),
     security_scopes: SecurityScopes,
+    db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme)
 ):
     settings = get_app_settings()
