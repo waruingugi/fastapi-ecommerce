@@ -10,6 +10,8 @@ from jose import JWTError, jwt
 from pydantic import BaseModel, ValidationError
 from app.users.daos.user import user_dao
 from app.users.serializers.user import UserBaseSerializer
+from sqlalchemy.orm import Session
+from app.core.config import get_app_settings
 
 
 class TokenData(BaseModel):
@@ -35,10 +37,11 @@ async def get_async_db() -> AsyncGenerator:
 
 
 async def get_current_user(
-    db: Session = Depends(get_db),
     security_scopes: SecurityScopes,
+    db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme)
 ):
+    settings = get_app_settings()
     if security_scopes.scopes:
         authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
     else:
@@ -76,6 +79,7 @@ async def get_current_user(
             )
 
     return user
+
 
 async def get_current_active_user(
     current_user: UserBaseSerializer = Security(get_current_user, scopes=["me"])

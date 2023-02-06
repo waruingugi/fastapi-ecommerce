@@ -11,8 +11,6 @@ from app.core.config import get_app_settings
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
 from pydantic import ValidationError
-from app.users.daos.user import user_dao
-from app.core.deps import get_db
 from sqlalchemy.orm import Session
 from app.users.serializers.user import UserBaseSerializer
 
@@ -44,7 +42,6 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
     return encoded_jwt
-
 
 # async def get_current_user(
 #     db: Session = Depends(get_db),
