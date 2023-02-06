@@ -4,6 +4,7 @@ from sqlalchemy.engine import URL
 from pydantic import (
     BaseSettings,
     PostgresDsn,
+    EmailStr
 )
 
 
@@ -21,7 +22,7 @@ class Settings(BaseSettings):
 
     SUPERUSER_FIRST_NAME: str
     SUPERUSER_LAST_NAME: str
-    SUPERUSER_EMAIL: str
+    SUPERUSER_EMAIL: EmailStr
     SUPERUSER_PASSWORD: str
     SUPERUSER_PHONE: str
 

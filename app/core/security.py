@@ -11,8 +11,6 @@ from app.core.config import get_app_settings
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
 from pydantic import ValidationError
-from app.users.daos.user import user_dao
-from app.core.deps import get_db
 from sqlalchemy.orm import Session
 from app.users.serializers.user import UserBaseSerializer
 

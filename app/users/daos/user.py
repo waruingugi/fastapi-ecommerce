@@ -16,11 +16,11 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def get_by_phone(self, db: Session, *, phone: str) -> Optional[User]:
         return db.query(User).filter(User.phone == phone).first()
 
-    def create(self, db: Session, *, obj_in: UserCreateSerializer):
+    def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
         create_user_data = obj_in.dict()
         create_user_data.pop("password")
 
-        db_obj = UserCreateSerializer(**create_user_data)
+        db_obj = User(**create_user_data)
         db_obj.hashed_password = get_password_hash(obj_in.password)
 
         db.add(db_obj)
