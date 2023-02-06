@@ -17,5 +17,5 @@ class User(Base):
     user_type = Column(
         String, default=UserTypes.CUSTOMER.value
     )
-    password: str = Column(String, nullable=False)
+    hashed_password: str = Column(String, nullable=False)
     business_memberships = relationship("Business", back_populates="owner", uselist=True)
