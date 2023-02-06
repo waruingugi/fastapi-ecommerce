@@ -13,7 +13,7 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
         return db.query(User).filter(User.email == email).first()
 
-    def get_by_phone(self, db: Session, *, phone: str) -> Optional[User]:
+    def get_by_phone(self, db: Session, phone: str) -> Optional[User]:
         return db.query(User).filter(User.phone == phone).first()
 
     def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
@@ -33,7 +33,7 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         user = self.get_by_phone(db, phone)
         if not user:
             return False
-        if not verify_password(password, user.password):
+        if not verify_password(password, user.hashed_password):
             return False
         return user
 

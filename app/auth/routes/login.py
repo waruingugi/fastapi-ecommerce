@@ -16,7 +16,9 @@ async def login_for_access_token(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    user = user_dao.authenticate_user(db, form_data.username, form_data.password)
+    user = user_dao.authenticate_user(
+        db, phone=form_data.username, password=form_data.password
+    )
 
     if not user:
         raise HTTPException(status_code=400, detail="Incorrect phone or password")
