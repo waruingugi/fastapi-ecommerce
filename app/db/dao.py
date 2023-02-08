@@ -295,6 +295,7 @@ class ReadDao(Generic[ModelType]):
         db: Session,
     ) -> List[ModelType]:
         query = select(self.model)
+        import pdb; pdb.set_trace()
         return db.scalars(query).all()
 
     def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
