@@ -24,6 +24,7 @@ from datetime import datetime
 from app.db.base_class import Base, generate_uuid
 from app.exceptions.custom import HttpErrorException
 from app.errors.custom import ErrorCodes
+from app.db.filters import _create_filtered_query
 from http import HTTPStatus
 
 
@@ -274,13 +275,6 @@ class ReadDao(Generic[ModelType]):
     ):
         self.model = model
 
-    def get(
-        self: Union[Any, DaoInterface],
-        db: Session,
-    ) -> Optional[ModelType]:
-        query = select(self.model)
-        return db.scalars(query).first()
-
     def get_not_none(
         self,
         db: Session
@@ -295,17 +289,26 @@ class ReadDao(Generic[ModelType]):
         db: Session,
     ) -> List[ModelType]:
         query = select(self.model)
-        import pdb; pdb.set_trace()
         return db.scalars(query).all()
 
     def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
         query = select(self.model)
         return db.scalars(query.where(self.model.id.in_(ids))).all()
-    
+
     def exists(self, db: Session, id: str) -> bool:
         return (
             db.scalars(select(self.model.id).filter_by(id=id).limit(1)).first()
         )
+
+    def get(
+        self: Union[Any, DaoInterface],
+        db: Session, 
+        **filters
+    ) -> List[ModelType]:
+        query = db.query(self.model)
+        filtered_query = _create_filtered_query(self.model, filters, query)
+
+        return filtered_query.all()
 
 
 class CRUDDao(

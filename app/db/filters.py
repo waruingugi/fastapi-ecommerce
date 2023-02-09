@@ -1,75 +1,86 @@
 # Inspired by https://pypi.org/project/sqlalchemy-filters/#description
-from itertools import chain
-from inspect import signature
-from collections import Iterable, namedtuple
-from six import string_types
-from sqlalchemy import and_, or_, not_
-from app.exceptions.custom import BadFilterFormat, FieldNotFound
-from sqlalchemy.inspection import inspect
-
-
-BooleanFunction = namedtuple(
-    'BooleanFunction', ('key', 'sqlalchemy_fn', 'only_one_arg')
+# from itertools import chain
+# from inspect import signature
+# from collections import namedtuple
+# from collections.abc import Iterable
+# from six import string_types
+# from sqlalchemy import and_, or_, not_
+# from app.exceptions.custom import BadFilterFormat, FieldNotFound
+# from sqlalchemy.inspection import inspect
+from sqlalchemy.future import select
+from sqlalchemy_filters.exceptions import BadFilterFormat
+from sqlalchemy_filters.filters import (
+    Operator, 
+    _is_iterable_filter,
+    BOOLEAN_FUNCTIONS,
+    BooleanFilter
 )
-BOOLEAN_FUNCTIONS = [
-    BooleanFunction('or', or_, False),
-    BooleanFunction('and', and_, False),
-    BooleanFunction('not', not_, True),
-]
-"""
-Sqlalchemy boolean functions that can be parsed from the filter definition.
-"""
+from sqlalchemy_filters.models import Field, get_model_from_spec
+
+from itertools import chain
+
+# BooleanFunction = namedtuple(
+#     'BooleanFunction', ('key', 'sqlalchemy_fn', 'only_one_arg')
+# )
+# BOOLEAN_FUNCTIONS = [
+#     BooleanFunction('or', or_, False),
+#     BooleanFunction('and', and_, False),
+#     BooleanFunction('not', not_, True),
+# ]
+# """
+# Sqlalchemy boolean functions that can be parsed from the filter definition.
+# """
 
 
-class Field(object):
+# class Field(object):
 
-    def __init__(self, model, field_name):
-        self.model = model
-        self.field_name = field_name
+#     def __init__(self, model, field_name):
+#         self.model = model
+#         self.field_name = field_name
 
-    def get_sqlalchemy_field(self):
-        if self.field_name not in inspect(self.model).columns.keys():
-            raise FieldNotFound(
-                'Model {} has no column `{}`.'.format(
-                    self.model, self.field_name
-                )
-            )
-        return getattr(self.model, self.field_name)
+#     def get_sqlalchemy_field(self):
+#         if self.field_name not in inspect(self.model).columns.keys():
+#             raise FieldNotFound(
+#                 'Model {} has no column `{}`.'.format(
+#                     self.model, self.field_name
+#                 )
+#             )
+#         return getattr(self.model, self.field_name)
 
 
-class Operator(object):
+# class Operator(object):
 
-    OPERATORS = {
-        'is_null': lambda f: f.is_(None),
-        'is_not_null': lambda f: f.isnot(None),
-        '==': lambda f, a: f == a,
-        'eq': lambda f, a: f == a,
-        '!=': lambda f, a: f != a,
-        'ne': lambda f, a: f != a,
-        '>': lambda f, a: f > a,
-        'gt': lambda f, a: f > a,
-        '<': lambda f, a: f < a,
-        'lt': lambda f, a: f < a,
-        '>=': lambda f, a: f >= a,
-        'ge': lambda f, a: f >= a,
-        '<=': lambda f, a: f <= a,
-        'le': lambda f, a: f <= a,
-        'like': lambda f, a: f.like(a),
-        'ilike': lambda f, a: f.ilike(a),
-        'in': lambda f, a: f.in_(a),
-        'not_in': lambda f, a: ~f.in_(a),
-    }
+#     OPERATORS = {
+#         'is_null': lambda f: f.is_(None),
+#         'is_not_null': lambda f: f.isnot(None),
+#         '==': lambda f, a: f == a,
+#         'eq': lambda f, a: f == a,
+#         '!=': lambda f, a: f != a,
+#         'ne': lambda f, a: f != a,
+#         '>': lambda f, a: f > a,
+#         'gt': lambda f, a: f > a,
+#         '<': lambda f, a: f < a,
+#         'lt': lambda f, a: f < a,
+#         '>=': lambda f, a: f >= a,
+#         'ge': lambda f, a: f >= a,
+#         '<=': lambda f, a: f <= a,
+#         'le': lambda f, a: f <= a,
+#         'like': lambda f, a: f.like(a),
+#         'ilike': lambda f, a: f.ilike(a),
+#         'in': lambda f, a: f.in_(a),
+#         'not_in': lambda f, a: ~f.in_(a),
+#     }
 
-    def __init__(self, operator=None):
-        if not operator:
-            operator = '=='
+#     def __init__(self, operator=None):
+#         if not operator:
+#             operator = '=='
 
-        if operator not in self.OPERATORS:
-            raise BadFilterFormat('Operator `{}` not valid.'.format(operator))
+#         if operator not in self.OPERATORS:
+#             raise BadFilterFormat('Operator `{}` not valid.'.format(operator))
 
-        self.operator = operator
-        self.function = self.OPERATORS[operator]
-        self.arity = len(signature(self.function).parameters)
+#         self.operator = operator
+#         self.function = self.OPERATORS[operator]
+#         self.arity = len(signature(self.function).parameters)
 
 
 class Filter(object):
@@ -92,21 +103,25 @@ class Filter(object):
         if not value_present and self.operator.arity == 2:
             raise BadFilterFormat('`value` must be provided.')
 
-    def get_named_models(self):
-        if "model" in self.filter_spec:
-            return {self.filter_spec['model']}
-        return set()
+    # def get_named_models(self):
+    #     if "model" in self.filter_spec:
+    #         return {self.filter_spec['model']}
+    #     return set()
 
     def format_for_sqlalchemy(self, query, default_model):
         filter_spec = self.filter_spec
         operator = self.operator
         value = self.value
 
+        model = default_model
+
+        # model = get_model_from_spec(filter_spec, query, default_model)
+
         function = operator.function
         arity = operator.arity
 
         field_name = self.filter_spec['field']
-        field = Field(default_model, field_name)
+        field = Field(model, field_name)
         sqlalchemy_field = field.get_sqlalchemy_field()
 
         if arity == 1:
@@ -116,26 +131,26 @@ class Filter(object):
             return function(sqlalchemy_field, value)
 
 
-class BooleanFilter(object):
+# class BooleanFilter(object):
 
-    def __init__(self, function, *filters):
-        self.function = function
-        self.filters = filters
+#     def __init__(self, function, *filters):
+#         self.function = function
+#         self.filters = filters
 
-    def format_for_sqlalchemy(self, query, default_model):
-        return self.function(*[
-            filter.format_for_sqlalchemy(query, default_model)
-            for filter in self.filters
-        ])
+#     def format_for_sqlalchemy(self, query, default_model):
+#         return self.function(*[
+#             filter.format_for_sqlalchemy(query, default_model)
+#             for filter in self.filters
+#         ])
 
 
-def _is_iterable_filter(filter_spec):
-    """ `filter_spec` may be a list of nested filter specs, or a dict.
-    """
-    return (
-        isinstance(filter_spec, Iterable) and
-        not isinstance(filter_spec, (string_types, dict))
-    )
+# def _is_iterable_filter(filter_spec):
+#     """ `filter_spec` may be a list of nested filter specs, or a dict.
+#     """
+#     return (
+#         isinstance(filter_spec, Iterable) and
+#         not isinstance(filter_spec, (string_types, dict))
+#     )
 
 
 def build_filters(filter_spec):
@@ -180,7 +195,22 @@ def build_filters(filter_spec):
     return [Filter(filter_spec)]
 
 
-def apply_filters(query, filter_spec, default_model):
+def _create_filter_spec(filter_spec):
+    """Format simple filter to fit filter specifications.
+    Example: ´user_dao.get(db, phone="+25470XXXXXX")´
+    Is formated to:
+    {'field': 'name', 'op': '==', 'value': 'foo'},
+    """
+    if (
+        isinstance(filter_spec, dict) and
+        not 'field' in filter_spec.keys()
+    ):
+        for key, value in filter_spec.items():
+            """Return the first dict only"""
+            return {'field': key, 'value': value, 'op': filter_spec.get('op', '==')}
+
+
+def _create_filtered_query(default_model, filter_spec, query):
     """Apply filters to a SQLAlchemy query.
     :param query:
         A :class:`sqlalchemy.orm.Query` instance.
@@ -206,6 +236,9 @@ def apply_filters(query, filter_spec, default_model):
         The :class:`sqlalchemy.orm.Query` instance after all the filters
         have been applied.
     """
+    # query = select(default_model)  # Create query object
+
+    filter_spec = _create_filter_spec(filter_spec)
     filters = build_filters(filter_spec)
 
     sqlalchemy_filters = [

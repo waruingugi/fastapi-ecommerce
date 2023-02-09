@@ -11,10 +11,17 @@ from typing import Any, List
 router = fastapi.APIRouter()
 
 
-
-@router.get("/", response_model=List[UserInDBSerializer])
-async def get_all_users(
+@router.get("/users/me", response_model=List[UserInDBSerializer])
+async def read_user_me(
     db: Session = Depends(get_db),
 ) -> Any:
-    """Retrieve users"""
+    """Get current user"""
+    return user_dao.get(db, phone="+254701023045")
+
+
+@router.get("/users", response_model=List[UserInDBSerializer])
+async def read_users(
+    db: Session = Depends(get_db),
+) -> Any:
+    """Get all users"""
     return user_dao.get_all(db)
