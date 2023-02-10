@@ -723,6 +723,21 @@ dotenv = ["python-dotenv (>=0.10.4)"]
 email = ["email-validator (>=1.0.3)"]
 
 [[package]]
+name = "pyisemail"
+version = "2.0.1"
+description = "Simple, robust email validation"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyisemail-2.0.1-py3-none-any.whl", hash = "sha256:3d2bebd159f436673219d024a3f02bed1b468c793df9a5fa08d72b7d4b4f6cb4"},
+    {file = "pyisemail-2.0.1.tar.gz", hash = "sha256:daf4b3fb2150a38f406b0aaba729e19fcd638a6d1c0549c25ff54c7b804618f8"},
+]
+
+[package.dependencies]
+dnspython = ">=2.0.0"
+
+[[package]]
 name = "python-dotenv"
 version = "0.21.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -1006,4 +1021,4 @@ standard = ["colorama (>=0.4)", "httptools (>=0.5.0)", "python-dotenv (>=0.13)",
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "31856886568c55d890806f1c5ea2e8721caaa3d190652a3b3106c4da1ac6f88d"
+content-hash = "77e9442ffd5700813ad01f49a94dc251b9155447cd141c5700845bd753c3f3b3"

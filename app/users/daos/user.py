@@ -16,6 +16,12 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def get_by_phone(self, db: Session, phone: str) -> Optional[User]:
         return db.query(User).filter(User.phone == phone).first()
 
+    def get_by_username(self, db: Session, *, email: str | None, phone: str | None):
+        if email: # and email is valid:
+            return self.get(db, email=email)
+        else:
+            return self.get(db, phone=phone)
+
     def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
         create_user_data = obj_in.dict()
         create_user_data.pop("password")

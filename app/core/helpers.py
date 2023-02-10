@@ -13,6 +13,7 @@ from app.errors.custom import ErrorCodes
 from phonenumbers.phonenumber import PhoneNumber
 from email_validator import validate_email
 from app.exceptions.custom import EmailIsNotValidException
+from pyisemail import is_email
 
 
 PHONE_NUMBER_TYPES = PhoneNumberType.MOBILE, PhoneNumberType.FIXED_LINE_OR_MOBILE
@@ -49,11 +50,7 @@ def validate_phone_number(phone: str) -> str:
 def validate_email(email: str | None) -> Optional[str]:
     """Validate str is a valid email"""
     if email:
-        try:
-            validation = validate_email(email)
-            email = validation.email
-
-        except EmailIsNotValidException as e:
-            raise EmailIsNotValidException(str(e))
+        if not is_email(email):
+            raise EmailIsNotValidException()
 
     return email

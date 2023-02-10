@@ -11,3 +11,5 @@ class HttpErrorException(HTTPException):
 
 class EmailIsNotValidException(Exception):
     """An invalid email was used"""
+    def __init__(self) -> None:
+        self.message = "An invalid email address was used"
