@@ -1,6 +1,10 @@
 from pydantic import BaseModel, EmailStr, validator
 from app.users.constants import UserTypes
-from app.core.helpers import capitalize_fields, validate_phone_number
+from app.core.helpers import (
+    capitalize_fields,
+    validate_phone_number,
+    validate_email
+)
 from app.db.serializer import InDBBaseSerializer
 from datetime import datetime
 
@@ -24,6 +28,10 @@ class UserCreateSerializer(UserBaseSerializer):
 
     _validate_phone_number = validator("phone", pre=True, allow_reuse=True)(
         validate_phone_number
+    )
+
+    _validate_email = validator("email", pre=True, allow_reuse=True)(
+        validate_email
     )
 
 

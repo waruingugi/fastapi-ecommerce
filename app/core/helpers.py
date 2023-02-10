@@ -1,5 +1,5 @@
-from pydantic import validator
-from typing import Any
+from pydantic import validator, EmailStr
+from typing import Any, Optional
 from phonenumbers import parse as parse_phone_number
 from phonenumbers import (
     NumberParseException,
@@ -11,6 +11,8 @@ from http import HTTPStatus
 from fastapi import HTTPException
 from app.errors.custom import ErrorCodes
 from phonenumbers.phonenumber import PhoneNumber
+from email_validator import validate_email
+from app.exceptions.custom import EmailIsNotValidException
 
 
 PHONE_NUMBER_TYPES = PhoneNumberType.MOBILE, PhoneNumberType.FIXED_LINE_OR_MOBILE
@@ -42,3 +44,16 @@ def validate_phone_number(phone: str) -> str:
         raise phone_number_exception
 
     return phone
+
+
+def validate_email(email: str | None) -> Optional[str]:
+    """Validate str is a valid email"""
+    if email:
+        try:
+            validation = validate_email(email)
+            email = validation.email
+
+        except EmailIsNotValidException as e:
+            raise EmailIsNotValidException(str(e))
+
+    return email

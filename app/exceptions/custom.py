@@ -7,3 +7,7 @@ class HttpErrorException(HTTPException):
         self.error_code = error_code
         self.error_message = error_message
         self.detail = error_message
+
+
+class EmailIsNotValidException(Exception):
+    """An invalid email was used"""

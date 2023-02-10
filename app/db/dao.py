@@ -124,7 +124,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
 
             if hasattr(self, "on_relationship"):
                 self.on_relationship(db, pk=obj_id, values=orig_data)
-            
+ 
             db.commit()
             db_obj = self.get_not_none(db, id=obj_id)
             self.on_post_create(db, db_obj)
