@@ -304,11 +304,11 @@ class ReadDao(Generic[ModelType]):
         self: Union[Any, DaoInterface],
         db: Session, 
         **filters
-    ) -> List[ModelType]:
+    ) -> Optional[ModelType]:
         query = db.query(self.model)
         filtered_query = _create_filtered_query(self.model, filters, query)
 
-        return filtered_query.all()
+        return filtered_query.first()
 
 
 class CRUDDao(

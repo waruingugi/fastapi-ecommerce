@@ -65,7 +65,7 @@ async def get_current_user(
     except (JWTError, ValidationError):
         raise credentials_exception
 
-    user = user_dao.get_by_phone(db, phone=token_data.phone)
+    user = user_dao.get_by_username(db, username=token_data.phone)
 
     if user is None:
         raise credentials_exception

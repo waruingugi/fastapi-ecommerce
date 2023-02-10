@@ -7,20 +7,30 @@ from app.users.models import User
 from app.users.serializers.user import UserCreateSerializer, UserUpdateSerializer
 from app.users.constants import UserTypes
 from app.core.security import get_password_hash, verify_password
+from app.core.helpers import validate_email
 
 
 class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
-    def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
-        return db.query(User).filter(User.email == email).first()
+    # def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
+    #     return db.query(User).filter(User.email == email).first()
 
-    def get_by_phone(self, db: Session, phone: str) -> Optional[User]:
-        return db.query(User).filter(User.phone == phone).first()
+    # def get_by_phone(self, db: Session, phone: str) -> Optional[User]:
+    #     return db.query(User).filter(User.phone == phone).first()
+    def get_by_phone_or_email(
+        self, db: Session, *, email: Optional[str] = None, phone: Optional[str] = None
+    ) -> Optional[User]:
+        if email:
+            return self.get_by_username(db, username=email)
 
-    def get_by_username(self, db: Session, *, email: str | None, phone: str | None):
-        if email: # and email is valid:
-            return self.get(db, email=email)
+        if phone:
+            return self.get_by_username(db, username=phone)
+        return None
+
+    def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
+        if validate_email(username):
+            return self.get(db, email=username)
         else:
-            return self.get(db, phone=phone)
+            return self.get(db, phone=username)
 
     def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
         create_user_data = obj_in.dict()
@@ -36,7 +46,7 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
     def authenticate_user(
         self, db: Session, *, phone: str, password: str
     ):
-        user = self.get_by_phone(db, phone)
+        user = self.get_by_username(db, phone=phone)
         if not user:
             return False
         if not verify_password(password, user.hashed_password):
