@@ -14,12 +14,10 @@ class UserBaseSerializer(BaseModel):
     last_name: str | None
     phone: str | None
     email: EmailStr | None
-    is_active: bool = False
 
 
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
-    user_type: str = UserTypes.CUSTOMER.value
     password: str
 
     _capitalize_fields = validator("first_name", "last_name", pre=True, allow_reuse=True)(

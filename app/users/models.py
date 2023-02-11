@@ -3,7 +3,7 @@ from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base, get_current_datetime
 from app.users.constants import UserTypes
 from enum import Enum
-from typing import List
+from app.core.security import get_password_hash
 from app.business_partner.models import Business
 
 
@@ -19,3 +19,6 @@ class User(Base):
     )
     hashed_password: str = Column(String, nullable=False)
     business_memberships = relationship("Business", back_populates="owner", uselist=True)
+
+    def on_pre_create(self):
+        pass
