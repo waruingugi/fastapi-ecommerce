@@ -1,5 +1,5 @@
 import fastapi
-from fastapi import Depends
+from fastapi import Depends, Query
 from sqlalchemy.orm import Session
 from app.users.serializers.user import UserInDBSerializer, UserCreateSerializer
 from sqlalchemy.orm import Session
@@ -9,6 +9,8 @@ from typing import Any, List
 from app.exceptions.custom import HttpErrorException
 from http import HTTPStatus
 from app.errors.custom import ErrorCodes
+from app.db.serializer import SearchParam
+from app.users.filters import UserFilter
 
 
 router = fastapi.APIRouter()
@@ -22,8 +24,18 @@ async def read_user_me(
     return user_dao.get(db, phone="+254701023045")
 
 
+# @router.get("/users", response_model=List[UserInDBSerializer])
+# async def read_users(
+#     db: Session = Depends(get_db),
+# ) -> Any:
+#     """Get all users"""
+#     return user_dao.get_all(db)
+
+
 @router.get("/users", response_model=List[UserInDBSerializer])
 async def read_users(
+    search: SearchParam = Depends(),
+    filters: UserFilter = Depends(),
     db: Session = Depends(get_db),
 ) -> Any:
     """Get all users"""
