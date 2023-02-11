@@ -1,7 +1,8 @@
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.orm import Mapped
-
+from sqlalchemy import event
+from typing import Optional, Callable
 
 import uuid
 from datetime import datetime
@@ -34,3 +35,13 @@ class Base(BaseClass):
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
+    @classmethod
+    def on_pre_create(cls, mapper, connection, target) -> Optional[Callable]:
+        """Execute before INSERT SQL statement"""
+        if hasattr(target, 'on_pre_create'):
+            target.on_pre_create()
+
+
+# Register event listeners
+event.listen(Base, 'before_insert', Base.on_pre_create, propagate=True)

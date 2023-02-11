@@ -26,7 +26,7 @@ def init_db(db: Session) -> None:
     settings = get_app_settings()
 
     if settings.SUPERUSER_EMAIL:
-        user = user_dao.get_by_email(db, email=settings.SUPERUSER_EMAIL)
+        user = user_dao.get_by_phone_or_email(db, email=settings.SUPERUSER_EMAIL)
 
         if not user:
             user_in = UserCreateSerializer(

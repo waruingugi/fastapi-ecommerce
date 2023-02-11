@@ -124,7 +124,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
 
             if hasattr(self, "on_relationship"):
                 self.on_relationship(db, pk=obj_id, values=orig_data)
-            
+ 
             db.commit()
             db_obj = self.get_not_none(db, id=obj_id)
             self.on_post_create(db, db_obj)
@@ -304,11 +304,11 @@ class ReadDao(Generic[ModelType]):
         self: Union[Any, DaoInterface],
         db: Session, 
         **filters
-    ) -> List[ModelType]:
+    ) -> Optional[ModelType]:
         query = db.query(self.model)
         filtered_query = _create_filtered_query(self.model, filters, query)
 
-        return filtered_query.all()
+        return filtered_query.first()
 
 
 class CRUDDao(
