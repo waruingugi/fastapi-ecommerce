@@ -16,12 +16,6 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
 
     # def get_by_phone(self, db: Session, phone: str) -> Optional[User]:
     #     return db.query(User).filter(User.phone == phone).first()
-    def on_pre_create(
-        self, db: Session, pk: str, values: dict, orig_values: dict
-    ) -> None:
-        if "password" in orig_values:
-            values["hashed_password"] = get_password_hash(orig_values["password"])
-
     def get_by_phone_or_email(
         self, db: Session, *, email: Optional[str] = None, phone: Optional[str] = None
     ) -> Optional[User]:
