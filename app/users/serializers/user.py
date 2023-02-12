@@ -15,11 +15,6 @@ class UserBaseSerializer(BaseModel):
     phone: str | None
     email: EmailStr | None
 
-
-class UserCreateSerializer(UserBaseSerializer):
-    phone: str
-    password: str
-
     _capitalize_fields = validator("first_name", "last_name", pre=True, allow_reuse=True)(
         capitalize_fields
     )
@@ -33,7 +28,16 @@ class UserCreateSerializer(UserBaseSerializer):
     )
 
 
-class UserActivateDeactivateSerializer(UserBaseSerializer):
+class UserCreateSerializer(UserBaseSerializer):
+    phone: str
+    password: str
+
+
+class UserReadSerializer(UserBaseSerializer):
+    pass
+
+
+class UserActivateDeactivateSerializer(BaseModel):
     is_active: bool
 
 

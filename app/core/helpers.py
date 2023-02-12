@@ -8,11 +8,9 @@ from phonenumbers import (
     number_type
 )
 from http import HTTPStatus
-from fastapi import HTTPException
+from app.exceptions.custom import HttpErrorException
 from app.errors.custom import ErrorCodes
-from phonenumbers.phonenumber import PhoneNumber
 from email_validator import validate_email
-from app.exceptions.custom import EmailIsNotValidException
 from pyisemail import is_email
 
 
@@ -29,20 +27,23 @@ def capitalize_fields(value) -> str:
 
 def validate_phone_number(phone: str) -> str:
     """Validate str can be parsed into phone number"""
-    phone_number_exception = HTTPException(
+    invalid_phone_number_exception = HttpErrorException(
         status_code=HTTPStatus.BAD_REQUEST,
-        detail=ErrorCodes.INVALID_PHONENUMBER.value
+        error_code=ErrorCodes.INVALID_PHONENUMBER.name,
+        error_message=ErrorCodes.INVALID_PHONENUMBER.value.format(
+            phone
+        ),
     )
     try:
         parsed_phone = parse_phone_number(phone)
     except NumberParseException:
-        raise phone_number_exception
+        raise invalid_phone_number_exception
 
     if (
         number_type(parsed_phone) not in PHONE_NUMBER_TYPES
         or not is_valid_number(parsed_phone)
     ):
-        raise phone_number_exception
+        raise invalid_phone_number_exception
 
     return phone
 
@@ -51,6 +52,12 @@ def validate_email(email: str | None) -> Optional[str]:
     """Validate str is a valid email"""
     if email:
         if not is_email(email):
-            raise EmailIsNotValidException()
+            raise HttpErrorException(
+                status_code=HTTPStatus.BAD_REQUEST,
+                error_code=ErrorCodes.INVALID_EMAIL.name,
+                error_message=ErrorCodes.INVALID_EMAIL.value.format(
+                    email
+                ),
+            )
 
     return email

@@ -108,7 +108,6 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
                 isinstance(obj_in_data[key], list)
                 or key in relationship_fields
                 or obj_in_data[key] is None
-                or key not in self.model.get_model_columns()
             ):
                 del obj_in_data[key]
 
@@ -126,7 +125,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
                 self.on_relationship(db, pk=obj_id, values=orig_data)
  
             db.commit()
-            db_obj = self.get_not_none(db, id=obj_id)
+            db_obj = self.get(db, id=obj_id)
             self.on_post_create(db, db_obj)
 
             return db_obj
