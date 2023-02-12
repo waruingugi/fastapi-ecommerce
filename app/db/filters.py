@@ -195,7 +195,7 @@ def build_filters(filter_spec):
     return [Filter(filter_spec)]
 
 
-def _create_filter_spec(filter_spec):
+def parse_query_filters(filter_spec):
     """Format simple filter to fit filter specifications.
     Example: ´user_dao.get(db, phone="+25470XXXXXX")´
     Is formated to:
@@ -238,7 +238,7 @@ def _create_filtered_query(default_model, filter_spec, query):
     """
     # query = select(default_model)  # Create query object
 
-    filter_spec = _create_filter_spec(filter_spec)
+    filter_spec = parse_query_filters(filter_spec)
     filters = build_filters(filter_spec)
 
     sqlalchemy_filters = [

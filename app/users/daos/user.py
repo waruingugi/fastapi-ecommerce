@@ -2,12 +2,13 @@ from typing import Optional, Union, Any, Dict
 
 from sqlalchemy.orm import Session
 
-from app.db.dao import CRUDDao
+from app.db.dao import CRUDDao, FilterType, ModelType
 from app.users.models import User
 from app.users.serializers.user import UserCreateSerializer, UserUpdateSerializer
 from app.users.constants import UserTypes
 from app.core.security import get_password_hash, verify_password
 from app.core.helpers import validate_email
+from app.db.serializer import SearchParam
 
 
 class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
