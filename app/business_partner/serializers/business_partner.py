@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr
 from app.business_partner.constants import BusinessTypes
-from app.db.serialiizer import InDBSerializer
+from app.db.serializer import InDBBaseSerializer
 
 
 class BusinessPartnerBaseSerializer(BaseModel):
@@ -24,7 +24,7 @@ class BusinessPartnerUpdateSerializer(BusinessPartnerBaseSerializer):
     deleted: bool | None
 
 
-class BusinessPartnerInDBSerializer(InDBSerializer, BusinessPartnerBaseSerializer):
+class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSerializer):
     is_verified: str
     is_physical: bool
     verification_state: str
