@@ -6,20 +6,17 @@ from app.db.serializer import InDBBaseSerializer
 class BusinessPartnerBaseSerializer(BaseModel):
     name: str | None
     email: EmailStr | None
-    phone: str | None
+    phone: str
     is_verified: bool = False
     is_physical: bool = False
 
 
 class BusinessPartnerCreateSerializer(BusinessPartnerBaseSerializer):
     name: str
-    phone: str
     business_type: str = BusinessTypes.SHOP.value
 
 
 class BusinessPartnerUpdateSerializer(BusinessPartnerBaseSerializer):
-    is_verified: bool | None
-    is_physical: bool | None
     verification_state: str | None
     deleted: bool | None
 
