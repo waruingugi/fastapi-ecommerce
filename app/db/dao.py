@@ -31,7 +31,7 @@ from http import HTTPStatus
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
-
+FilterType = TypeVar("FilterType")
 
 # Class that we can use to keep track of the changes in an object
 class ChangeAttrState(TypedDict):
