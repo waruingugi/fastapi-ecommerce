@@ -32,7 +32,7 @@ ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
 FilterType = TypeVar("FilterType")
-
+on_relationship
 # Class that we can use to keep track of the changes in an object
 class ChangeAttrState(TypedDict):
     before: Any
@@ -52,7 +52,7 @@ class DaoInterface(Protocol[ModelType]):
         self,
         db: Session,
         *,
-        pk: str,
+        id: str,
         values: dict,
         db_obj: Optional[ModelType] = None,
         create: bool = True
@@ -75,7 +75,7 @@ class DaoInterface(Protocol[ModelType]):
     def get_or_none(self, db: Session, **filters: Any) -> ModelType:
         pass
 
-    def on_pre_create(self, db: Session, pk: str, values: dict, orig_values: dict) -> None:
+    def on_pre_create(self, db: Session, id: str, values: dict, orig_values: dict) -> None:
         pass
 
     def on_post_create(self, db: Session, db_obj: Union[ModelType, List[ModelType]]) -> None:
@@ -107,6 +107,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
             if (
                 isinstance(obj_in_data[key], list)
                 or key in relationship_fields
+                or key not in db_obj.get_model_columns()
                 or obj_in_data[key] is None
             ):
                 del obj_in_data[key]
@@ -115,14 +116,14 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
             obj_id = obj_in_data.pop("id", None) or generate_uuid()
             if hasattr(self, "on_pre_create"):
                 self.on_pre_create(
-                    db, pk=obj_id, values=obj_in_data, orig_values=orig_data
+                    db, id=obj_id, values=obj_in_data, orig_values=orig_data
                 )
 
             stmt = insert(self.model.__table__).values(id=obj_id, **obj_in_data)
             db.execute(stmt)
 
             if hasattr(self, "on_relationship"):
-                self.on_relationship(db, pk=obj_id, values=orig_data)
+                self.on_relationship(db, id=obj_id, values=orig_data)
  
             db.commit()
             db_obj = self.get(db, id=obj_id)
@@ -133,7 +134,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
             db.rollback()
 
     def on_pre_create(
-        self, db: Session, pk: str, values: dict, orig_values: dict
+        self, db: Session, id: str, values: dict, orig_values: dict
     ) -> None:
         pass
 
@@ -212,7 +213,7 @@ class UpdateDao(Generic[ModelType, UpdateSerializer]):
 
         stmt = (
             update(self.model.__table__)
-            .wher(self.model.id == db_obj.id)
+            .where(self.model.id == db_obj.id)
             .values(**update_data)
             .execution_options(synchronize_session="fetch")
         )
@@ -220,7 +221,7 @@ class UpdateDao(Generic[ModelType, UpdateSerializer]):
 
         if hasattr(self, "on_relationship"):
             self.on_relationship(
-                db, pk=db_obj.id, values=orig_update_data, db_obj=db_obj, create=False
+                db, id=db_obj.id, values=orig_update_data, db_obj=db_obj, create=False
             )
 
         try:

@@ -2,7 +2,8 @@ from sqlalchemy.ext.declarative import declarative_base, declared_attr
 from sqlalchemy import Column, DateTime, String
 from sqlalchemy.orm import Mapped
 from sqlalchemy import event
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict
+from sqlalchemy_utils import get_columns
 
 import uuid
 from datetime import datetime
@@ -35,6 +36,11 @@ class Base(BaseClass):
     @declared_attr
     def __tablename__(cls) -> str:
         return cls.__name__.lower()
+
+    @classmethod
+    def get_model_columns(cls) -> Dict[str, str]:
+        return get_columns(cls).keys()
+
 
     @classmethod
     def on_pre_create(cls, mapper, connection, target) -> Optional[Callable]:
