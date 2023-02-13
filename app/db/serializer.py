@@ -8,6 +8,9 @@ class InDBBaseSerializer(BaseModel):
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime | None
 
+    class Config:
+        orm_mode = True
+
     @validator("updated_at")
     def default_updated_at_to_created_at(
         cls, updated_at: datetime | None, values: Dict
@@ -17,9 +20,6 @@ class InDBBaseSerializer(BaseModel):
                 values["created_at"] if values["created_at"] else datetime.now()
             )
         return updated_at
-
-    class Config:
-        orm_mode = True
 
 
 class SearchParam(BaseModel):

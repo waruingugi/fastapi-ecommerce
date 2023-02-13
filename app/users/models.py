@@ -12,7 +12,7 @@ class User(Base):
     first_name: str = Column(String, nullable=True)
     last_name: str = Column(String, nullable=True)
     phone: Mapped[str] = Column(String, nullable=False, index=True)
-    email: str = Column(String, unique=True, index=True, nullable=True)
+    email: str = Column(String, unique=True, index=True, nullable=False)
     is_active = Column(Boolean, default=False)
     user_type = Column(
         String, default=UserTypes.CUSTOMER.value

@@ -8,6 +8,8 @@ from app.core.helpers import (
 from app.db.serializer import InDBBaseSerializer
 from datetime import datetime
 from app.db.base_class import generate_uuid
+from typing import List, Optional
+
 
 class UserBaseSerializer(BaseModel):
     first_name: str | None
@@ -45,6 +47,8 @@ class UserUpdateSerializer(UserBaseSerializer):
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
     user_type: str
     date_joined: datetime
+    business_memberships: Optional[List]
 
-    class Config:
-        orm_mode = True
+
+class UserReadSerializer(UserBaseSerializer, InDBBaseSerializer):
+    pass

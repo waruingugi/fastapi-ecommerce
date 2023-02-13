@@ -3,13 +3,14 @@ from app.business_partner.constants import BusinessTypes
 from app.db.serializer import InDBBaseSerializer
 from app.users.serializers.user import (
     UserCreateSerializer,
-    UserInDBSerializer
+    UserReadSerializer
 )
 from app.core.helpers import (
     capitalize_fields,
     validate_phone_number,
     validate_email
 )
+from typing import Optional, List, Any
 
 
 class BusinessPartnerBaseSerializer(BaseModel):
@@ -52,4 +53,4 @@ class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSeria
     is_verified: str
     is_physical: bool
     verification_state: str
-    owner: UserInDBSerializer
+    owner: UserReadSerializer
