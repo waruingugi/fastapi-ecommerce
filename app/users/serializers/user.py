@@ -11,6 +11,29 @@ from app.db.base_class import generate_uuid
 from typing import List, Optional
 
 
+class BusinessPartnerBaseSerializer(BaseModel):
+    name: str | None
+    email: EmailStr | None
+    phone: str
+    is_physical: bool = False
+
+    _capitalize_fields = validator("name", pre=True, allow_reuse=True)(
+        capitalize_fields
+    )
+
+    _validate_phone_number = validator("phone", pre=True, allow_reuse=True)(
+        validate_phone_number
+    )
+
+    _validate_email = validator("email", pre=True, allow_reuse=True)(
+        validate_email
+    )
+
+
+class BusinessParnterReadSerializer(BusinessPartnerBaseSerializer, InDBBaseSerializer):
+    pass
+
+
 class UserBaseSerializer(BaseModel):
     first_name: str | None
     last_name: str | None
@@ -47,7 +70,7 @@ class UserUpdateSerializer(UserBaseSerializer):
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
     user_type: str
     date_joined: datetime
-    business_memberships: Optional[List]
+    business_memberships: Optional[List[BusinessParnterReadSerializer]]
 
 
 class UserReadSerializer(UserBaseSerializer, InDBBaseSerializer):
