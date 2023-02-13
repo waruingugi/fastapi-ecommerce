@@ -1,7 +1,10 @@
 from pydantic import BaseModel, EmailStr, validator
 from app.business_partner.constants import BusinessTypes
 from app.db.serializer import InDBBaseSerializer
-from app.users.serializers.user import UserReadSerializer
+from app.users.serializers.user import (
+    UserCreateSerializer,
+    UserInDBSerializer
+)
 from app.core.helpers import (
     capitalize_fields,
     validate_phone_number,
@@ -31,7 +34,7 @@ class BusinessPartnerBaseSerializer(BaseModel):
 class BusinessPartnerCreateSerializer(BusinessPartnerBaseSerializer):
     name: str
     business_type: str = BusinessTypes.SHOP.value
-    owner: UserReadSerializer
+    owner: UserCreateSerializer
 
 
 class BusinessPartnerCreateExistingOwnerSerializer(BusinessPartnerBaseSerializer):
@@ -49,6 +52,4 @@ class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSeria
     is_verified: str
     is_physical: bool
     verification_state: str
-
-    class Config:
-        orm_mode = True
+    owner: UserInDBSerializer

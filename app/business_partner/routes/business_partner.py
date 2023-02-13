@@ -36,16 +36,18 @@ async def create_business_partner(
     business_data_dict = business_data.dict(exclude_unset=True)
     owner = business_data_dict.pop("owner")
 
-    user_in = user_dao.get_by_phone_or_email(
-        db, email=owner.get("email", None), phone=owner.get("phone", None)
-    )
+    """Check whether the business owner exists"""
+    user_in = user_dao.get_or_create(db, obj_in=business_data.owner)
+    # user_in = user_dao.get_by_phone_or_email(
+    #     db, email=owner.get("email", None), phone=owner.get("phone", None)
+    # )
 
-    if not user_in:
-        raise HttpErrorException(
-            status_code=HTTPStatus.BAD_REQUEST,
-            error_code=ErrorCodes.BUSINESS_OWNER_DOES_NOT_EXIST.name,
-            error_message=ErrorCodes.BUSINESS_OWNER_DOES_NOT_EXIST.value
-        )
+    # if not user_in:
+    #     raise HttpErrorException(
+    #         status_code=HTTPStatus.BAD_REQUEST,
+    #         error_code=ErrorCodes.BUSINESS_OWNER_DOES_NOT_EXIST.name,
+    #         error_message=ErrorCodes.BUSINESS_OWNER_DOES_NOT_EXIST.value
+    #     )
 
     obj_in = BusinessPartnerCreateExistingOwnerSerializer(
         owner_id=user_in.id, **business_data_dict

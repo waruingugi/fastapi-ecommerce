@@ -18,6 +18,9 @@ class InDBBaseSerializer(BaseModel):
             )
         return updated_at
 
+    class Config:
+        orm_mode = True
+
 
 class SearchParam(BaseModel):
     q: str | None

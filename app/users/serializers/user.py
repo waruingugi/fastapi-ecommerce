@@ -7,7 +7,7 @@ from app.core.helpers import (
 )
 from app.db.serializer import InDBBaseSerializer
 from datetime import datetime
-
+from app.db.base_class import generate_uuid
 
 class UserBaseSerializer(BaseModel):
     first_name: str | None
@@ -30,11 +30,7 @@ class UserBaseSerializer(BaseModel):
 
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
-    password: str
-
-
-class UserReadSerializer(UserBaseSerializer):
-    pass
+    password: str = generate_uuid()
 
 
 class UserActivateDeactivateSerializer(BaseModel):

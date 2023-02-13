@@ -32,7 +32,7 @@ ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
 FilterType = TypeVar("FilterType")
-on_relationship
+
 # Class that we can use to keep track of the changes in an object
 class ChangeAttrState(TypedDict):
     before: Any
@@ -107,7 +107,7 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
             if (
                 isinstance(obj_in_data[key], list)
                 or key in relationship_fields
-                or key not in db_obj.get_model_columns()
+                or key not in self.model.get_model_columns()
                 or obj_in_data[key] is None
             ):
                 del obj_in_data[key]
