@@ -4,10 +4,14 @@ from sqlalchemy.orm import Session
 
 from app.db.dao import CRUDDao, FilterType, ModelType
 from app.users.models import User
-from app.users.serializers.user import UserCreateSerializer, UserUpdateSerializer
+from app.users.serializers.user import (
+    UserCreateSerializer,
+    UserUpdateSerializer,
+    UserBaseSerializer
+)
 from app.users.constants import UserTypes
 from app.core.security import get_password_hash, verify_password
-from app.core.helpers import validate_email
+from pyisemail import is_email
 from app.db.serializer import SearchParam
 
 
@@ -28,10 +32,27 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         return None
 
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
-        if validate_email(username):
+        if is_email(username):
             return self.get(db, email=username)
         else:
             return self.get(db, phone=username)
+    
+    def get_or_create(
+        self, db: Session,
+        obj_in: Union[
+            UserBaseSerializer,
+            UserCreateSerializer
+        ],
+    ) -> User:
+        """Get or create a user"""
+        user_in = user_dao.get_by_phone_or_email(
+            db, email=obj_in.email, phone=obj_in.phone
+        )
+        if not user_in:
+            user_data = UserCreateSerializer(**obj_in.dict())
+            user_in = self.create(db, obj_in=user_data)
+
+        return user_in
 
     def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
         create_user_data = obj_in.dict()

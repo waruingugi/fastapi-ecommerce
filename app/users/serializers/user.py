@@ -7,6 +7,31 @@ from app.core.helpers import (
 )
 from app.db.serializer import InDBBaseSerializer
 from datetime import datetime
+from app.db.base_class import generate_uuid
+from typing import List, Optional
+
+
+class BusinessPartnerBaseSerializer(BaseModel):
+    name: str | None
+    email: EmailStr | None
+    phone: str
+    is_physical: bool = False
+
+    _capitalize_fields = validator("name", pre=True, allow_reuse=True)(
+        capitalize_fields
+    )
+
+    _validate_phone_number = validator("phone", pre=True, allow_reuse=True)(
+        validate_phone_number
+    )
+
+    _validate_email = validator("email", pre=True, allow_reuse=True)(
+        validate_email
+    )
+
+
+class BusinessParnterReadSerializer(BusinessPartnerBaseSerializer, InDBBaseSerializer):
+    pass
 
 
 class UserBaseSerializer(BaseModel):
@@ -14,11 +39,6 @@ class UserBaseSerializer(BaseModel):
     last_name: str | None
     phone: str | None
     email: EmailStr | None
-
-
-class UserCreateSerializer(UserBaseSerializer):
-    phone: str
-    password: str
 
     _capitalize_fields = validator("first_name", "last_name", pre=True, allow_reuse=True)(
         capitalize_fields
@@ -33,7 +53,12 @@ class UserCreateSerializer(UserBaseSerializer):
     )
 
 
-class UserActivateDeactivateSerializer(UserBaseSerializer):
+class UserCreateSerializer(UserBaseSerializer):
+    phone: str
+    password: str = generate_uuid()
+
+
+class UserActivateDeactivateSerializer(BaseModel):
     is_active: bool
 
 
@@ -45,6 +70,8 @@ class UserUpdateSerializer(UserBaseSerializer):
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
     user_type: str
     date_joined: datetime
+    business_memberships: Optional[List[BusinessParnterReadSerializer]]
 
-    class Config:
-        orm_mode = True
+
+class UserReadSerializer(UserBaseSerializer, InDBBaseSerializer):
+    pass

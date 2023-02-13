@@ -8,6 +8,9 @@ class InDBBaseSerializer(BaseModel):
     created_at: datetime = Field(default=datetime.now())
     updated_at: datetime | None
 
+    class Config:
+        orm_mode = True
+
     @validator("updated_at")
     def default_updated_at_to_created_at(
         cls, updated_at: datetime | None, values: Dict
