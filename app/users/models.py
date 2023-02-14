@@ -4,7 +4,7 @@ from app.db.base_class import Base, get_current_datetime
 from app.users.constants import UserTypes
 from enum import Enum
 from app.core.security import get_password_hash
-from app.business_partner.models import Business
+from app.business_partner.models import BusinessPartner
 
 
 class User(Base):
@@ -18,7 +18,7 @@ class User(Base):
         String, default=UserTypes.CUSTOMER.value
     )
     hashed_password: str = Column(String, nullable=False)
-    business_memberships = relationship("Business", back_populates="owner", uselist=True)
+    business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
 
     def on_pre_create(self):
         pass
