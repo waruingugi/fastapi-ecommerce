@@ -55,7 +55,11 @@ class UserBaseSerializer(BaseModel):
 
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
-    password: str = generate_uuid()
+    password: str | None
+
+    @validator('password', pre=True, always=True)
+    def set_ts_now(cls, value):
+        return value or generate_uuid()
 
 
 class UserActivateDeactivateSerializer(BaseModel):
