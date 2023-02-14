@@ -17,8 +17,8 @@ def get_application() -> FastAPI:
         version=settings.API_VERSION
     )
 
-    application.include_router(user_api.router, prefix=settings.API_V1_STR)
     application.include_router(auth_api.router, prefix=settings.API_V1_STR)
+    application.include_router(user_api.router, prefix=settings.API_V1_STR)
     application.include_router(business_partner_api.router, prefix=settings.API_V1_STR)
 
 

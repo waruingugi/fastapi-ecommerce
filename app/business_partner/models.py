@@ -5,7 +5,7 @@ from app.business_partner.constants import BusinessTypes, BusinessVerificationSt
 from enum import Enum
 
 
-class Business(Base):
+class BusinessPartner(Base):
     name: str = Column(String, nullable=False)
     business_type: str = Column(
         String, default=BusinessTypes.SHOP.value,
