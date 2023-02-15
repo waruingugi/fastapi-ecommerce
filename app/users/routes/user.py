@@ -11,6 +11,8 @@ from http import HTTPStatus
 from app.errors.custom import ErrorCodes
 from app.db.serializer import SearchParam
 from app.users.filters import UserFilter
+from app.core import deps
+from app.users.models import User
 
 
 router = fastapi.APIRouter()
@@ -37,6 +39,7 @@ async def read_users(
     search: SearchParam = Depends(),
     filters: UserFilter = Depends(),
     db: Session = Depends(get_db),
+    _: User = Depends(deps.get_current_active_user)
 ) -> Any:
     """Get all users"""
     return user_dao.get_all(db)

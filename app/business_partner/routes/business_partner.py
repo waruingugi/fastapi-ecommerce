@@ -14,6 +14,8 @@ from app.exceptions.custom import HttpErrorException
 from app.errors.custom import ErrorCodes
 from http import HTTPStatus
 from app.users.daos.user import user_dao
+from app.core import deps
+from app.users.models import User
 
 
 router = fastapi.APIRouter()
@@ -22,6 +24,7 @@ router = fastapi.APIRouter()
 @router.get("/business-partner", response_model=List[BusinessPartnerInDBSerializer])
 async def read_business_partners(
     db: Session = Depends(get_db),
+    _: User = Depends(deps.get_current_active_user)
 ) -> Any:
     """Read business partners"""
     return business_partner_dao.get_all(db)

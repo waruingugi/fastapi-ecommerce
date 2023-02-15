@@ -11,7 +11,7 @@ from app.auth.serializers.token import TokenBaseSerializer
 router = APIRouter()
 
 
-@router.post("/token", response_model=TokenBaseSerializer)
+@router.post("/access-token", response_model=TokenBaseSerializer)
 async def login_for_access_token(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
