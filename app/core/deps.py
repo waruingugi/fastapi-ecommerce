@@ -11,7 +11,7 @@ from pydantic import BaseModel, ValidationError
 from app.users.daos.user import user_dao
 from app.users.serializers.user import UserBaseSerializer
 from sqlalchemy.orm import Session
-from app.core.config import get_app_settings
+from app.core.config import settings, get_app_settings
 
 
 class TokenData(BaseModel):
@@ -21,7 +21,7 @@ class TokenData(BaseModel):
 
 
 oauth2_scheme = OAuth2PasswordBearer(
-    tokenUrl="token",
+    tokenUrl=f"{settings.API_V1_STR}/auth/access-token",
     scopes={"me": "Read information about the current user.", "items": "Read items."},
 )
 
