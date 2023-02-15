@@ -14,7 +14,8 @@ def get_application() -> FastAPI:
         description="""
             Learning FastAPI by building an industry grade application.
         """,
-        version=settings.API_VERSION
+        version=settings.API_VERSION,
+        swagger_ui_parameters={"persistAuthorization": True},
     )
 
     application.include_router(auth_api.router, prefix=settings.API_V1_STR)
