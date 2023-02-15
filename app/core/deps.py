@@ -15,7 +15,7 @@ from app.core.config import settings, get_app_settings
 
 
 class TokenData(BaseModel):
-    phone: str | None = None
+    username: str | None = None
     scopes: List[str] = []
 
 
@@ -55,17 +55,17 @@ async def get_current_user(
 
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-        phone: str = payload.get("sub")
-        if phone is None:
+        username: str = payload.get("sub")
+        if username is None:
             raise credentials_exception
 
         token_scopes = payload.get("scopes", [])
-        token_data = TokenData(scopes=token_scopes, phone=phone)
+        token_data = TokenData(scopes=token_scopes, username=username)
 
     except (JWTError, ValidationError):
         raise credentials_exception
 
-    user = user_dao.get_by_username(db, username=token_data.phone)
+    user = user_dao.get_by_username(db, username=token_data.username)
 
     if user is None:
         raise credentials_exception

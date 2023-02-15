@@ -66,9 +66,9 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         return db_obj
 
     def authenticate_user(
-        self, db: Session, *, phone: str, password: str
+        self, db: Session, *, username: str, password: str
     ):
-        user = self.get_by_username(db, username=phone)
+        user = self.get_by_username(db, username=username)
         if not user:
             return False
         if not verify_password(password, user.hashed_password):

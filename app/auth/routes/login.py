@@ -17,11 +17,11 @@ async def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
     user = user_dao.authenticate_user(
-        db, phone=form_data.username, password=form_data.password
+        db, username=form_data.username, password=form_data.password
     )
 
     if not user:
-        raise HTTPException(status_code=400, detail="Incorrect phone or password")
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
 
     access_token = create_access_token(
         data={"sub": user.phone, "scopes": form_data.scopes},
