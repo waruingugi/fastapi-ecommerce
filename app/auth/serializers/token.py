@@ -20,7 +20,7 @@ class TokenBaseSerializer(BaseModel):
 
 
 class TokenReadSerializer(BaseModel):
-    sub: str
+    user_id: str
     access_token: Optional[str]
     refresh_token: Optional[str]
     token_type: str
