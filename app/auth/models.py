@@ -22,10 +22,10 @@ class AuthToken(Base):
     token_type: str = Column(String, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     access_token_expires_at: datetime = Column(DateTime, nullable=False)
-    refresh_token_expires_in = Column(Integer, nullable=False)
+    refresh_token_expires_at: datetime = Column(DateTime, nullable=False)
 
     user = relationship("User", uselist=False)
 
     @property
-    def is_invalid(self) -> bool:
-        return (not self.is_active) or (datetime.utcnow() > self.expires_at)
+    def refresh_token_is_valid(self) -> bool:
+        return bool(self.is_active) and (datetime.utcnow() < self.refresh_token_expires_at)

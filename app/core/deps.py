@@ -14,6 +14,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.exceptions.custom import InsufficientUserPrivileges, InactiveAccount
 from app.users.models import User
+from app.auth.utils.token import check_refresh_token_is_valid
 
 
 class TokenData(BaseModel):
@@ -98,5 +99,8 @@ async def get_current_active_superuser(
     return current_user
 
 
-def get_decoded_token():
+def get_decoded_token(
+    token: str = Depends(oauth2_scheme),
+    check_refresh_token_is_valid: bool = Depends(check_refresh_token_is_valid),
+):
     pass
