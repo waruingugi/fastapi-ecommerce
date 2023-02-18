@@ -96,3 +96,7 @@ async def get_current_active_superuser(
     if not user_dao.is_superuser(current_user):
         raise InsufficientUserPrivileges
     return current_user
+
+
+def get_decoded_token():
+    pass

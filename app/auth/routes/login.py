@@ -46,3 +46,9 @@ async def login(
 # Fetch user_id
 # Get access token from db
 # If valid contiue
+# If invalid, check refresh token is valid
+# Issue new access token n refresh token
+# Invalidate previous tokens linked with user
+# If is invalid, 
+# Ask user to log in again
+# If user uses invalid token raise waring of hacker
