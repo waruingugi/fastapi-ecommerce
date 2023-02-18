@@ -31,8 +31,26 @@ class InsufficientUserPrivileges(HttpErrorException):
 
 class InactiveAccount(HttpErrorException):
     def __init__(self) -> None:
-        super(InactiveUser, self).__init__(
+        super(InactiveAccount, self).__init__(
             status_code=HTTPStatus.UNAUTHORIZED,
             error_code=ErrorCodes.INACTIVE_ACCOUNT.name,
             error_message=ErrorCodes.INACTIVE_ACCOUNT.value
+        )
+
+
+class ExpiredRefreshToken(HttpErrorException):
+    def __init__(self) -> None:
+        super(ExpiredRefreshToken, self).__init__(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            error_code=ErrorCodes.EXPIRED_REFRESH_TOKEN.name,
+            error_message=ErrorCodes.EXPIRED_REFRESH_TOKEN.value,
+        )
+
+
+class ExpiredAccessToken(HttpErrorException):
+    def __init__(self) -> None:
+        super(ExpiredAccessToken, self).__init__(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            error_code=ErrorCodes.EXPIRED_AUTHORIZATION_TOKEN.name,
+            error_message=ErrorCodes.EXPIRED_AUTHORIZATION_TOKEN.value,
         )

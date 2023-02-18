@@ -10,3 +10,5 @@ class ErrorCodes(str, Enum):
     INCORRECT_USERNAME_OR_PASSWORD = "Incorrect username or password"
     USERS_PRIVILEGES_NOT_ENOUGH = "This user doesn't have enough privileges"
     INACTIVE_ACCOUNT = "This account is currently inactive"
+    EXPIRED_REFRESH_TOKEN = "The refresh token expired"
+    EXPIRED_AUTHORIZATION_TOKEN = "The authorization token expired"

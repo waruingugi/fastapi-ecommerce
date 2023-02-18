@@ -12,9 +12,16 @@ from app.users.daos.user import user_dao
 from app.users.serializers.user import UserBaseSerializer
 from sqlalchemy.orm import Session
 from app.core.config import settings
-from app.exceptions.custom import InsufficientUserPrivileges, InactiveAccount
+from app.exceptions.custom import (
+    InsufficientUserPrivileges,
+    InactiveAccount,
+    ExpiredRefreshToken
+)
 from app.users.models import User
-from app.auth.utils.token import check_refresh_token_is_valid
+from app.auth.utils.token import (
+    check_refresh_token_is_valid,
+    check_access_token_is_valid
+)
 
 
 class TokenData(BaseModel):
@@ -100,7 +107,9 @@ async def get_current_active_superuser(
 
 
 def get_decoded_token(
+    db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme),
-    check_refresh_token_is_valid: bool = Depends(check_refresh_token_is_valid),
 ):
-    pass
+    if not check_refresh_token_is_valid(db, token=token):
+        raise ExpiredRefreshToken
+    
