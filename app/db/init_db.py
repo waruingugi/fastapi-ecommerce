@@ -6,7 +6,7 @@ from app.users.serializers.user import UserCreateSerializer
 from app.users.constants import UserTypes
 from app.db import base  # noqa
 
-from app.core.config import get_app_settings
+from app.core.config import settings
 
 
 
@@ -23,7 +23,6 @@ def init_db(db: Session) -> None:
     # But if you don't want to use migrations, create
     # the tables by un-commenting the next line
     # Base.metadata.create_all(bind=engine)
-    settings = get_app_settings()
 
     if settings.SUPERUSER_EMAIL:
         user = user_dao.get_by_phone_or_email(db, email=settings.SUPERUSER_EMAIL)

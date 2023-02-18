@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from app.core.config import get_app_settings
+from app.core.config import settings
 
 from app.users import api as user_api
 from app.auth import api as auth_api
@@ -8,7 +8,6 @@ from typing import Any
 
 
 def get_application() -> FastAPI:
-    settings = get_app_settings()
     application: Any = FastAPI(
         title=settings.PROJECT_NAME,
         description="""

@@ -4,7 +4,7 @@ from sqlalchemy import engine_from_config
 from sqlalchemy import pool
 
 from app.db.base import Base
-from app.core.config import get_app_settings
+from app.core.config import settings
 
 from alembic import context
 
@@ -24,7 +24,6 @@ if config.config_file_name is not None:
 # target_metadata = None
 target_metadata=Base.metadata
 
-settings = get_app_settings()
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

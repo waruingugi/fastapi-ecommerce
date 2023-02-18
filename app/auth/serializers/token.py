@@ -12,6 +12,12 @@ class TokenGrantType(Enum):
     PASSWORD = "password"
     REFRESH_TOKEN = "refresh_token"
 
+class TokenBaseSerializer(BaseModel):
+    access_token: str
+    refresh_token: Optional[str]
+    token_type: TokenGrantType
+    user_id: str
+
 
 class TokenReadSerializer(BaseModel):
     sub: str
@@ -21,14 +27,17 @@ class TokenReadSerializer(BaseModel):
     refresh_token_ein: Optional[int]
 
 
-class TokenBaseSerializer(BaseModel):
-    access_token: str
-    refresh_token: Optional[str]
+class TokenCreateSerializer(BaseModel):
     token_type: TokenGrantType
     user_id: str
+    access_token: str
+    refresh_token: str
+    expires_in: int
+    expires_at: datetime
+    is_active: bool
 
 
-class TokenInDbSerializer(TokenBaseSerializer, InDBBaseSerializer):
+class TokenInDBSerializer(TokenBaseSerializer, InDBBaseSerializer):
     id: str
     expires_at: datetime
     expires_in: int

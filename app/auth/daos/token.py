@@ -1,13 +1,13 @@
 from app.auth.serializers.token import (
     TokenCreateSerializer,
-    TokenInDbSerializer
+    TokenInDBSerializer
 )
 from app.db.dao import CRUDDao
 from app.auth.models import AuthToken
 
 
 class TokenDao(
-    CRUDDao[AuthToken, TokenCreateSerializer, TokenInDbSerializer]
+    CRUDDao[AuthToken, TokenCreateSerializer, TokenInDBSerializer]
 ):
     pass
 

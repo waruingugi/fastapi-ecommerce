@@ -5,14 +5,13 @@ from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncSession
 )
-from app.core.config import get_app_settings
+from app.core.config import settings
 from functools import lru_cache
 from sqlalchemy.engine import Engine
 
 
 lru_cache
 def get_engine() -> Engine:
-    settings = get_app_settings()
     return create_engine(
         settings.SQLALCHEMY_DATABASE_URI,
         future=True,
@@ -27,7 +26,6 @@ def get_engine() -> Engine:
 ## Check class type
 lru_cache
 def get_async_engine() -> AsyncEngine:
-    settings = get_app_settings()
     return create_async_engine(
         settings.ASYNC_SQLALCHEMY_DATABASE_URI,
         pool_pre_ping=True,

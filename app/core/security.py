@@ -1,19 +1,17 @@
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
-from app.core.config import get_app_settings
+from app.core.config import settings
 from jose import jwt
 from fastapi.security import (
     OAuth2PasswordBearer,
     SecurityScopes,
 )
 from fastapi import Depends, FastAPI, HTTPException, Security, status
-from app.core.config import get_app_settings
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 
 
-settings = get_app_settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -27,11 +25,10 @@ def get_password_hash(password: str):
 
 
 def create_access_token(
-    db: Session, subject: str, grant_type: str, expires_in: int | None
+    db: Session, subject: str, grant_type: str
 ) -> dict:
-    expires_in_seconds = (
-        expires_in if expires_in else settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
-    )
+    "Create access token and refresh token"
+    expires_in_seconds =  settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
     refresh_expires_in_seconds = settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS
 
     to_encode = {

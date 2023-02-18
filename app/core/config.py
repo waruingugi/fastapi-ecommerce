@@ -6,6 +6,7 @@ from pydantic import (
     PostgresDsn,
     EmailStr
 )
+from typing import cast
 
 
 class Settings(BaseSettings):
@@ -16,6 +17,7 @@ class Settings(BaseSettings):
     SECRET_KEY : str
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 24
+    REFRESH_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 7
 
     SQLALCHEMY_DATABASE_URI: PostgresDsn = None
     ASYNC_SQLALCHEMY_DATABASE_URI: PostgresDsn = None
@@ -36,4 +38,5 @@ def get_app_settings():
     return Settings()
 
 
-settings = Settings()
+# settings = Settings()
+settings = cast(Settings, get_app_settings())

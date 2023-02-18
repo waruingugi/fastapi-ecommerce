@@ -11,7 +11,9 @@ from pydantic import BaseModel, ValidationError
 from app.users.daos.user import user_dao
 from app.users.serializers.user import UserBaseSerializer
 from sqlalchemy.orm import Session
-from app.core.config import settings, get_app_settings
+from app.core.config import settings
+from app.exceptions.custom import InsufficientUserPrivileges, InactiveAccount
+from app.users.models import User
 
 
 class TokenData(BaseModel):
@@ -40,8 +42,7 @@ async def get_current_user(
     security_scopes: SecurityScopes,
     db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme)
-):
-    settings = get_app_settings()
+) -> User:
     if security_scopes.scopes:
         authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
     else:
@@ -82,8 +83,16 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: UserBaseSerializer = Security(get_current_user, scopes=["me"])
-):
+    current_user: User = Security(get_current_user)
+) -> User:
     if not current_user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise InactiveAccount
+    return current_user
+
+
+async def get_current_active_superuser(
+    current_user: User = Security(get_current_user)
+) -> User:
+    if not user_dao.is_superuser(current_user):
+        raise InsufficientUserPrivileges
     return current_user

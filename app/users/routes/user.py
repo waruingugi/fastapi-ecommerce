@@ -39,7 +39,7 @@ async def read_users(
     search: SearchParam = Depends(),
     filters: UserFilter = Depends(),
     db: Session = Depends(get_db),
-    _: User = Depends(deps.get_current_active_user)
+    _: User = Depends(deps.get_current_active_superuser)
 ) -> Any:
     """Get all users"""
     return user_dao.get_all(db)
