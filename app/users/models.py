@@ -19,6 +19,3 @@ class User(Base):
     )
     hashed_password: str = Column(String, nullable=False)
     business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
-
-    def on_pre_create(self):
-        pass

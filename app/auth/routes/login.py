@@ -7,8 +7,12 @@ from app.users.daos.user import user_dao
 from app.exceptions.custom import IncorrectCredentials
 
 from app.core import deps
-from app.auth.serializers.token import TokenGrantType, TokenReadSerializer
+from app.auth.serializers.token import (
+    TokenGrantType,
+    TokenReadSerializer
+)
 from app.auth.serializers.auth import LoginSerializer
+from app.auth.utils.login import login_user
 
 router = APIRouter()
 
@@ -18,27 +22,19 @@ async def login_for_access_token(
     db: Session = Depends(deps.get_db),
     form_data: OAuth2PasswordRequestForm = Depends()
 ):
-    user = user_dao.authenticate_user(
-        db, username=form_data.username, password=form_data.password
-    )
+    """Get access token for future requests"""
+    login_data = LoginSerializer(username=form_data.username, password=form_data.password)
+    token = login_user(db, login_data=login_data)
+    return token
 
-    if not user:
-        raise IncorrectCredentials
-
-    return create_access_token(
-        data={
-            "sub": user.phone, 
-            "scopes": form_data.scopes,
-            "grant_type": TokenGrantType.CLIENT_CREDENTIALS.value
-        },
-    )
 
 @router.post("/login", response_model=TokenReadSerializer)
 async def login(
     login_data: LoginSerializer,
     db: Session = Depends(deps.get_db),
 ) -> TokenReadSerializer:
-    pass
+    token = login_user(db, login_data=login_data)
+    return token
 
 
 # On login

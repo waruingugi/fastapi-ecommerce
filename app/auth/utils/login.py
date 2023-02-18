@@ -25,13 +25,16 @@ def get_access_token(db: Session, *, user_id: str) -> AuthToken:
     )
 
     obj_in = TokenCreateSerializer(
-        **token_data,
+        user_id=user_id,
+        access_token=token_data["access_token"],
+        refresh_token=token_data["refresh_token"],
+        expires_in=token_data["expires_in"],
         token_type=TokenGrantType.CLIENT_CREDENTIALS,
-        expires_at=datetime.utcnow() + timedelta(seconds=token_data["expires_ind"]),
+        expires_at=datetime.utcnow() + timedelta(seconds=token_data["expires_in"]),
         is_active=True
     )
 
-    return  token_dao.create(db, obj_in=obj_in)
+    return token_dao.create(db, obj_in=obj_in)
 
 
 def login_user(db: Session, login_data: LoginSerializer) -> TokenReadSerializer:

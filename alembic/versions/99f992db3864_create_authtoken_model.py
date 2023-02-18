@@ -34,7 +34,7 @@ def upgrade() -> None:
     )
     op.alter_column('user', 'email',
                existing_type=sa.VARCHAR(),
-               nullable=False)
+               nullable=True)
     # ### end Alembic commands ###
 
 
