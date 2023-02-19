@@ -12,6 +12,7 @@ class TokenGrantType(Enum):
     PASSWORD = "password"
     REFRESH_TOKEN = "refresh_token"
 
+
 class TokenBaseSerializer(BaseModel):
     access_token: str
     refresh_token: Optional[str]

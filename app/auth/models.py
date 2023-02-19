@@ -29,7 +29,3 @@ class AuthToken(Base):
     @property
     def refresh_token_is_valid(self) -> bool:
         return bool(self.is_active) and (datetime.utcnow() < self.refresh_token_expires_at)
-
-    @property
-    def access_token_is_valid(self) -> bool:
-        return bool(self.is_active) and (datetime.utcnow() < self.access_token_expires_at)

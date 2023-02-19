@@ -54,3 +54,12 @@ class ExpiredAccessToken(HttpErrorException):
             error_code=ErrorCodes.EXPIRED_AUTHORIZATION_TOKEN.name,
             error_message=ErrorCodes.EXPIRED_AUTHORIZATION_TOKEN.value,
         )
+
+
+class InvalidToken(HttpErrorException):
+    def __init__(self) -> None:
+        super(InvalidToken, self).__init__(
+            status_code=HTTPStatus.UNAUTHORIZED,
+            error_code=ErrorCodes.INVALID_TOKEN.name,
+            error_message=ErrorCodes.INVALID_TOKEN.value,
+        )

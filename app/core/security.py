@@ -28,12 +28,12 @@ def create_access_token(
     db: Session, subject: str, grant_type: str
 ) -> dict:
     "Create access token and refresh token"
-    expires_in_seconds =  settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
-    refresh_expires_in_seconds = settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS
+    access_token_ein =  settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
+    refresh_ein = settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS
 
     to_encode = {
         "iat": int(datetime.utcnow().timestamp()),
-        "exp": datetime.utcnow() + timedelta(seconds=expires_in_seconds),
+        "exp": datetime.utcnow() + timedelta(seconds=access_token_ein),
         "user_id": str(subject),
         "grant_type": grant_type
     }
@@ -41,7 +41,7 @@ def create_access_token(
     # Create access token
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
     # Create refresh token
-    to_encode["exp"] = datetime.utcnow() + timedelta(seconds=refresh_expires_in_seconds)
+    to_encode["exp"] = datetime.utcnow() + timedelta(seconds=refresh_ein)
     to_encode["iat"] = int(datetime.utcnow().timestamp())
 
     refresh_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
@@ -50,8 +50,8 @@ def create_access_token(
         "access_token": token,
         "refresh_token": refresh_token,
         "token_type": grant_type,
-        "expires_in": expires_in_seconds,
-        "refresh_expires_in": refresh_expires_in_seconds,
+        "access_token_ein": access_token_ein,
+        "refresh_ein": refresh_ein,
         "user_id": subject,
     }
     return token_data

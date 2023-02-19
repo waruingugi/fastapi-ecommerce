@@ -12,3 +12,4 @@ class ErrorCodes(str, Enum):
     INACTIVE_ACCOUNT = "This account is currently inactive"
     EXPIRED_REFRESH_TOKEN = "The refresh token expired"
     EXPIRED_AUTHORIZATION_TOKEN = "The authorization token expired"
+    INVALID_TOKEN = "Could not validate your token"
