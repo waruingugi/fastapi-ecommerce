@@ -54,9 +54,9 @@ def get_decoded_token(
     token: str = Depends(oauth2_scheme),
 ) -> dict:
     """Decode the token"""
-    if not check_refresh_token_is_valid(db, refresh_token=token):
-        raise ExpiredRefreshToken
-    
+    # if not check_refresh_token_is_valid(db, refresh_token=token):
+    #     raise ExpiredRefreshToken
+
     if check_access_token_is_valid(db, access_token=token):
         try:
             payload = jwt.decode(
@@ -65,7 +65,7 @@ def get_decoded_token(
                 algorithms=[settings.ALGORITHM],
                 options={"verify_exp": True}
             )
-            
+ 
             return payload
         except (JWTError, ValidationError):
             raise InvalidToken
