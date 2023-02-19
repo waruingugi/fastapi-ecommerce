@@ -1,40 +1,13 @@
 from app.users.daos.user import user_dao
 from app.auth.daos.token import TokenDao
 from sqlalchemy.orm import Session
-from app.auth.models import AuthToken
-from app.core.security import create_access_token
-from app.auth.serializers.token import (
-    TokenGrantType,
-    TokenCreateSerializer,
-    TokenReadSerializer
-)
+from app.core.security import get_access_token
+from app.auth.serializers.token import TokenReadSerializer
 from app.auth.serializers.auth import LoginSerializer
 from datetime import datetime, timedelta
-from app.auth.daos.token import token_dao
 from fastapi import Depends
 from app.exceptions.custom import IncorrectCredentials, InactiveAccount
 from app.core.config import settings
-
-
-def get_access_token(db: Session, *, user_id: str) -> AuthToken:
-    """Creates access token and saves it to ´AuthToken´ model"""
-    token_data = create_access_token(
-        db=db,
-        subject=user_id,
-        grant_type=TokenGrantType.CLIENT_CREDENTIALS.value
-    )
-
-    obj_in = TokenCreateSerializer(
-        user_id=user_id,
-        token_type=TokenGrantType.CLIENT_CREDENTIALS,
-        access_token=token_data["access_token"],
-        refresh_token=token_data["refresh_token"],
-        refresh_token_eat=datetime.utcnow() + timedelta(seconds=token_data["refresh_ein"]),
-        access_token_eat=datetime.utcnow() + timedelta(seconds=token_data["access_token_ein"]),
-        is_active=True
-    )
-
-    return token_dao.create(db, obj_in=obj_in)
 
 
 def login_user(db: Session, login_data: LoginSerializer) -> TokenReadSerializer:
