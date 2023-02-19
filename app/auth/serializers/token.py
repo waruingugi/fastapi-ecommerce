@@ -40,6 +40,10 @@ class TokenCreateSerializer(BaseModel):
 
 class TokenInDBSerializer(TokenBaseSerializer, InDBBaseSerializer):
     id: str
-    expires_at: datetime
-    expires_in: int
+    access_token_eat: datetime
+    refresh_token_eat: datetime
     is_active: bool
+
+
+class RenewAccessTokenSerializer(BaseModel):
+    token: str

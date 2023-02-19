@@ -8,7 +8,6 @@ from app.exceptions.custom import IncorrectCredentials
 
 from app.core import deps
 from app.auth.serializers.token import (
-    TokenGrantType,
     TokenReadSerializer
 )
 from app.auth.serializers.auth import LoginSerializer
