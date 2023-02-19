@@ -103,7 +103,7 @@ async def get_current_user(
     #     raise credentials_exception
 
     # user = user_dao.get_by_username(db, username=token_data.username)
-    user = user_dao.get_by_username(db, username=token_payload["user_id"])
+    user = user_dao.get(db, id=token_payload["user_id"])
 
     if user is None:
         raise IncorrectCredentials
