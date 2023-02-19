@@ -21,11 +21,11 @@ class AuthToken(Base):
     user_id = Column(String, ForeignKey("user.id"))
     token_type: str = Column(String, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
-    access_token_expires_at: datetime = Column(DateTime, nullable=False)
-    refresh_token_expires_at: datetime = Column(DateTime, nullable=False)
+    access_token_eat: datetime = Column(DateTime, nullable=False)
+    refresh_token_eat: datetime = Column(DateTime, nullable=False)
 
     user = relationship("User", uselist=False)
 
     @property
     def refresh_token_is_valid(self) -> bool:
-        return bool(self.is_active) and (datetime.utcnow() < self.refresh_token_expires_at)
+        return bool(self.is_active) and (datetime.utcnow() < self.refresh_token_eat)

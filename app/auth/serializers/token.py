@@ -32,10 +32,10 @@ class TokenCreateSerializer(BaseModel):
     token_type: TokenGrantType
     user_id: str
     access_token: str
-    refresh_token: str
-    expires_in: int
-    expires_at: datetime
-    is_active: bool
+    refresh_token: str | None
+    access_token_eat: datetime
+    refresh_token_eat: datetime
+    is_active: bool = True
 
 
 class TokenInDBSerializer(TokenBaseSerializer, InDBBaseSerializer):
