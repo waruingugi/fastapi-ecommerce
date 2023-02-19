@@ -1,21 +1,29 @@
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
-from app.core.config import get_app_settings
+from app.core.config import settings
 from jose import jwt
 from fastapi.security import (
     OAuth2PasswordBearer,
     SecurityScopes,
 )
 from fastapi import Depends, FastAPI, HTTPException, Security, status
-from app.core.config import get_app_settings
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
-from pydantic import ValidationError
 from sqlalchemy.orm import Session
-from app.users.serializers.user import UserBaseSerializer
+from app.auth.daos.token import token_dao
+from app.auth.models import AuthToken
+from app.auth.serializers.token import (
+    TokenGrantType,
+    TokenCreateSerializer
+)
+from app.auth.utils.token import (
+    check_refresh_token_is_valid,
+    check_access_token_is_valid
+)
+from app.auth.serializers.token import TokenReadSerializer
+from app.exceptions.custom import ExpiredRefreshToken, InvalidToken
+from pydantic import ValidationError
 
-
-settings = get_app_settings()
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -28,67 +36,93 @@ def get_password_hash(password: str):
     return pwd_context.hash(password)
 
 
-def create_access_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
+def get_access_token(db: Session, *, user_id: str) -> AuthToken:
+    """Creates access token and saves it to ´AuthToken´ model"""
+    token_data = create_access_token(
+        db=db,
+        subject=user_id,
+        grant_type=TokenGrantType.CLIENT_CREDENTIALS.value
+    )
 
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
+    obj_in = TokenCreateSerializer(
+        user_id=user_id,
+        token_type=TokenGrantType.CLIENT_CREDENTIALS,
+        access_token=token_data["access_token"],
+        refresh_token=token_data["refresh_token"],
+        refresh_token_eat=datetime.utcnow() + timedelta(seconds=token_data["refresh_ein"]),
+        access_token_eat=datetime.utcnow() + timedelta(seconds=token_data["access_token_ein"]),
+        is_active=True
+    )
+
+    return token_dao.create(db, obj_in=obj_in)
+
+
+def get_decoded_refresh_token(
+    db: Session, token: str,
+) -> dict:
+    """Decode the token"""
+    if check_refresh_token_is_valid(db, refresh_token=token):
+        try:
+            payload = jwt.decode(
+                token,
+                settings.SECRET_KEY,
+                algorithms=[settings.ALGORITHM],
+                options={"verify_exp": True}
+            )
+ 
+            return payload
+        except (JWTError, ValidationError):
+            raise InvalidToken
     else:
-        expire = datetime.utcnow() + timedelta(
-            seconds=settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
-        )
+        raise ExpiredRefreshToken
 
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-    return encoded_jwt
+def renew_access_token(
+    db: Session, *, token: str
+):
+    """Generate new access token if refresh token is valid."""
+    token_payload = get_decoded_refresh_token(db, token)
+    token = get_access_token(db, user_id=token_payload["user_id"])
+    token_dict = {
+        "user_id": token.user_id,
+        "access_token": token.access_token,
+        "refresh_token": token.refresh_token,
+        "exp": token.access_token_eat,
+        "token_type": "bearer",
+    }
 
-# async def get_current_user(
-#     db: Session = Depends(get_db),
-#     security_scopes: SecurityScopes,
-#     token: str = Depends(oauth2_scheme)
-# ):
-#     if security_scopes.scopes:
-#         authenticate_value = f'Bearer scope="{security_scopes.scope_str}"'
-#     else:
-#         authenticate_value = "Bearer"
+    return TokenReadSerializer(**token_dict)
 
-#     credentials_exception = HTTPException(
-#         status_code=status.HTTP_401_UNAUTHORIZED,
-#         detail="Could not validate credentials",
-#         headers={"WWW-Authenticate": authenticate_value},
-#     )
 
-#     try:
-#         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-#         phone: str = payload.get("sub")
-#         if phone is None:
-#             raise credentials_exception
 
-#         token_scopes = payload.get("scopes", [])
-#         token_data = TokenData(scopes=token_scopes, phone=phone)
+def create_access_token(
+    db: Session, subject: str, grant_type: str
+) -> dict:
+    "Create access token and refresh token"
+    access_token_ein =  settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
+    refresh_ein = settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS
 
-#     except (JWTError, ValidationError):
-#         raise credentials_exception
+    to_encode = {
+        "iat": int(datetime.utcnow().timestamp()),
+        "exp": datetime.utcnow() + timedelta(seconds=access_token_ein),
+        "user_id": str(subject),
+        "grant_type": grant_type
+    }
 
-#     user = user_dao.get_by_phone(db, phone=token_data.phone)
+    # Create access token
+    token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    # Create refresh token
+    to_encode["exp"] = datetime.utcnow() + timedelta(seconds=refresh_ein)
+    to_encode["iat"] = int(datetime.utcnow().timestamp())
 
-#     if user is None:
-#         raise credentials_exception
+    refresh_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
 
-#     for scope in security_scopes.scopes:
-#         if scope not in token_data.scopes:
-#             raise HTTPException(
-#                 status_code=status.HTTP_401_UNAUTHORIZED,
-#                 detail="Not enough permissions",
-#                 headers={"WWW-Authenticate": authenticate_value},
-#             )
-
-#     return user
-
-# async def get_current_active_user(
-#     current_user: UserBaseSerializer = Security(get_current_user, scopes=["me"])
-# ):
-#     if not current_user.is_active:
-#         raise HTTPException(status_code=400, detail="Inactive user")
-#     return current_user
+    token_data = {
+        "access_token": token,
+        "refresh_token": refresh_token,
+        "token_type": grant_type,
+        "access_token_ein": access_token_ein,
+        "refresh_ein": refresh_ein,
+        "user_id": subject,
+    }
+    return token_data

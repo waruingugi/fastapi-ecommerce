@@ -12,13 +12,10 @@ class User(Base):
     first_name: str = Column(String, nullable=True)
     last_name: str = Column(String, nullable=True)
     phone: Mapped[str] = Column(String, nullable=False, index=True)
-    email: str = Column(String, unique=True, index=True, nullable=False)
+    email: str = Column(String, unique=True, index=True, nullable=True)
     is_active = Column(Boolean, default=False)
     user_type = Column(
         String, default=UserTypes.CUSTOMER.value
     )
     hashed_password: str = Column(String, nullable=False)
     business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
-
-    def on_pre_create(self):
-        pass
