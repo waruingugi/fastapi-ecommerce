@@ -26,11 +26,11 @@ def get_access_token(db: Session, *, user_id: str) -> AuthToken:
 
     obj_in = TokenCreateSerializer(
         user_id=user_id,
+        token_type=TokenGrantType.CLIENT_CREDENTIALS,
         access_token=token_data["access_token"],
         refresh_token=token_data["refresh_token"],
-        expires_in=token_data["expires_in"],
-        token_type=TokenGrantType.CLIENT_CREDENTIALS,
-        expires_at=datetime.utcnow() + timedelta(seconds=token_data["expires_in"]),
+        refresh_token_eat=datetime.utcnow() + timedelta(seconds=token_data["refresh_ein"]),
+        access_token_eat=datetime.utcnow() + timedelta(seconds=token_data["access_token_ein"]),
         is_active=True
     )
 
@@ -53,7 +53,7 @@ def login_user(db: Session, login_data: LoginSerializer) -> TokenReadSerializer:
         "user_id": user.id,
         "access_token": token.access_token,
         "refresh_token": token.refresh_token,
-        "refresh_token_ein": settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS,
+        "exp": token.access_token_eat,
         "token_type": "bearer",
     }
 

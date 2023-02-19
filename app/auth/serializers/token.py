@@ -25,7 +25,7 @@ class TokenReadSerializer(BaseModel):
     access_token: Optional[str]
     refresh_token: Optional[str]
     token_type: str
-    refresh_token_ein: Optional[int]
+    exp: datetime
 
 
 class TokenCreateSerializer(BaseModel):
