@@ -15,4 +15,8 @@ def check_access_token_is_valid(db: Session, access_token: str) -> bool:
     token_obj = token_dao.get(db, access_token=access_token)
 
     token_eat = token_obj.access_token_eat if token_obj else None
-    return token_eat is not None and token_eat >= datetime.utcnow()
+    return (
+        token_eat is not None
+        and token_eat >= datetime.utcnow()
+        and bool(token_obj.is_active)
+    )
