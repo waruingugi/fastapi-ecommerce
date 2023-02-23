@@ -30,18 +30,3 @@ class AuthToken(Base):
     @property
     def refresh_token_is_valid(self) -> bool:
         return bool(self.is_active) and (datetime.utcnow() < self.refresh_token_eat)
-
-
-class UserRole(Base):
-    name = Column(String, nullable=False)
-    _permissions = Column(Text())
-    scope = Column(String, nullable=True)
-    user_id = Column(String, ForeignKey("user.id"), unique=True)
-
-    user = relationship("User", uselist=False)
-
-    @property
-    def permissions(self) -> List[str]:
-        if self.permissions:
-            return self._permissions.replace(" ", "").split(",")
-        return []
