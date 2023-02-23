@@ -16,13 +16,14 @@ router = APIRouter()
 
 @router.post("/")
 async def create_user_role(
-    db: Session = Depends(deps.get_db),
     user_role_in: UserRoleCreateSerializer,
+    db: Session = Depends(deps.get_db),
     _: User = Depends(deps.get_current_active_superuser)
 ):
-    perm_classes: List[BasePermission] = []
-    if user_role_in.permissions:
-        for perm_in in user_role_in.permissions:
-            pass
 
     return {"permission": "work in progress"}
+
+# Modify base permission to return list of perms
+# In route, check if perm is in defined roles
+# Assign user those roles
+# Create in db

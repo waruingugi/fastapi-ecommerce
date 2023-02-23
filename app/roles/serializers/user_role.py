@@ -14,4 +14,4 @@ class UserRoleInDBSerializer(InDBBaseSerializer, UserRoleBaseSerializer):
 
 
 class UserRoleCreateSerializer(UserRoleBaseSerializer):
-    permissions: List[str] | None
+    pass

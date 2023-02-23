@@ -4,7 +4,7 @@ from app.business_partner.permissions import BusinessPartnerPermissions
 from app.users.permissions import UserPermissions
 
 
-AdminPermissions: List[BasePermission] = [
+AdminPermissions: List[BasePermission] = (
     BusinessPartnerPermissions.list_()
     + UserPermissions.list_()
-]
+)

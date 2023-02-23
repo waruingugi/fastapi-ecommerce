@@ -1,5 +1,4 @@
 from pydantic import BaseModel, EmailStr, validator
-from app.users.constants import UserScopeTypes
 from app.core.helpers import (
     capitalize_fields,
     validate_phone_number,
