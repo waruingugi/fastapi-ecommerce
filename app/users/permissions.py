@@ -1,4 +1,4 @@
-from app.auth.constants import BasePermission
+from app.db.permissions import BasePermission
 
 
 class UserPermissions(BasePermission):
