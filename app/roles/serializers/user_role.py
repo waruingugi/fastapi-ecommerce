@@ -13,5 +13,5 @@ class UserRoleInDBSerializer(InDBBaseSerializer, UserRoleBaseSerializer):
     permissions: List[str] | None
 
 
-class CreateUserRoleSerializer(UserRoleBaseSerializer):
+class UserRoleCreateSerializer(UserRoleBaseSerializer):
     permissions: List[str] | None
