@@ -7,6 +7,7 @@ from app.users.models import User
 from app.roles.constants import UserPermissions
 from typing import List
 from app.users.daos.user import user_dao
+from app.exceptions.custom import UserDoesNotExist
 
 
 router = APIRouter()
@@ -21,6 +22,10 @@ async def update_user_role(
     user_in = user_dao.get_by_username(
         db, username=role_in.phone
     )
+
+    if not user_in:
+        raise UserDoesNotExist
+
     assign_perms = []
     for perm in UserPermissions:
         if role_in.name == perm.name:

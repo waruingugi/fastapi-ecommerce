@@ -14,6 +14,10 @@ class UserRoleInDBSerializer(InDBBaseSerializer, UserRoleBaseSerializer):
     permissions: List[str] | None
 
 
+class UserRoleCreateSerializer(BaseModel):
+    pass
+
+
 class UserRoleUpdateSerializer(UserRoleBaseSerializer):
     phone: str
 
