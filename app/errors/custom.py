@@ -13,3 +13,4 @@ class ErrorCodes(str, Enum):
     EXPIRED_REFRESH_TOKEN = "The refresh token expired"
     EXPIRED_AUTHORIZATION_TOKEN = "The authorization token expired"
     INVALID_TOKEN = "Could not validate your token"
+    USER_NOT_FOUND = "This user does not exist in the system"

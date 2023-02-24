@@ -11,4 +11,9 @@ class BasePermission(str, Enum):
 
     @classmethod
     def list_(cls) -> List:
-        return [permission for permission in cls]
+        perms = {permission.value for permission in cls}
+        return list(perms)
+    
+    @classmethod
+    def description(cls) -> str:
+        return ""
