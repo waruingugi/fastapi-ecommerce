@@ -72,3 +72,9 @@ class UserDoesNotExist(HttpErrorException):
             error_code=ErrorCodes.USER_NOT_FOUND.name,
             error_message=ErrorCodes.USER_NOT_FOUND.value,
         )
+
+
+class ObjectDoesNotExist(Exception):
+    """The specified object was not found"""
+    def __init__(self, message: str) -> None:
+        self.message = message

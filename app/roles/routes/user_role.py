@@ -8,6 +8,7 @@ from app.roles.constants import UserPermissions
 from typing import List
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
+from app.roles.daos.user_role import user_role_dao
 
 
 router = APIRouter()
@@ -19,19 +20,16 @@ async def update_user_role(
     db: Session = Depends(deps.get_db),
     _: User = Depends(deps.get_current_active_superuser)
 ):
+    """Update user role"""
     user_in = user_dao.get_by_username(
         db, username=role_in.phone
     )
-
     if not user_in:
         raise UserDoesNotExist
 
-    assign_perms = []
-    for perm in UserPermissions:
-        if role_in.name == perm.name:
-            assign_perms.append(perm.value)
-
-    return {"permission": assign_perms}
+    user_role = user_role_dao.get_not_none(db, user_id=user_in.id)
+    
+    return user_role.update(db, db_obj=user_role, obj_in=role_in.dict())
 
 # Modify base permission to return list of perms
 # In route, check if perm is in defined roles

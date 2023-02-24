@@ -22,7 +22,7 @@ from sqlalchemy.future import select
 from datetime import datetime
 
 from app.db.base_class import Base, generate_uuid
-from app.exceptions.custom import HttpErrorException
+from app.exceptions.custom import HttpErrorException, ObjectDoesNotExist
 from app.errors.custom import ErrorCodes
 from app.db.filters import _create_filtered_query
 from http import HTTPStatus
@@ -277,11 +277,12 @@ class ReadDao(Generic[ModelType]):
 
     def get_not_none(
         self,
-        db: Session
+        db: Session,
+        **filters
     ) -> ModelType:
-        obj = self.get(db)
+        obj = self.get(db, **filters)
         if not obj:
-            raise  # raise custom exception here
+            raise  ObjectDoesNotExist(f"Object with filters {filters} not found")
         return obj
 
     def get_all(
