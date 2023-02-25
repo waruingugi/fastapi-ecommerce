@@ -11,7 +11,7 @@ from typing import List
 
 class UserRole(Base):
     name = Column(String, nullable=False)
-    _permissions = Column("permissions", Text())
+    _permissions = Column( Text())
     scope = Column(String, nullable=True)
     user_id = Column(String, ForeignKey("user.id"), unique=True)
 
