@@ -13,22 +13,34 @@ from app.exceptions.custom import UserDoesNotExist
 class UserRoleDao(
     CRUDDao[UserRole, UserRoleCreateSerializer, UserRoleUpdateSerializer]
 ):
-    def on_pre_update(
-        self, db: Session, db_obj: UserRole, values: dict, orig_values: dict
-    ) -> None:
-        """Automatically assign permissions based on role."""
-        if orig_values.get("permissions", None):
-            assign_perms = []
-            role_name = orig_values.get("name", None)
-
+    def get_permissions_from_role(self, role_name: str, permissions: str | None) -> str:
+        """Generate permissions from role"""
+        assign_perms = []
+        if not permissions:
             for perm in UserPermissions:
                 if role_name == perm.name:
                     assign_perms.append(perm.value)
 
-            # Convert permissions to string and save to model
-            values["_permissions"] = ', '.join(map(str, assign_perms))
+        # Return permissions as string
+        return (
+            ', '.join(map(str, assign_perms)) if assign_perms else ''
+        )
 
-    
+    def on_pre_create(self, db: Session, id: str, values: dict, orig_values: dict) -> None:
+        values["permissions"] = self.get_permissions_from_role(
+            orig_values["name"],
+            orig_values.get("permissions", None)
+        )
+
+    def on_pre_update(
+        self, db: Session, db_obj: UserRole, values: dict, orig_values: dict
+    ) -> None:
+        """Automatically assign permissions based on role."""
+        values["permissions"] = self.get_permissions_from_role(
+            orig_values["name"],
+            orig_values.get("permissions", None)
+        )
+
     def get_or_create(
         self, db: Session, obj_in: UserRoleUpdateSerializer,
     ) -> UserRole:

@@ -30,8 +30,7 @@ def get_module_name(revision: str) -> str | None:
 def run_migration_scripts(
     *,
     revision: str,
-    migration_type: str,
-    db: Session = Depends(deps.get_db),
+    migration_type: str
 ) -> None:
     """Run migration script related to specific alembic version"""
     module_name = get_module_name(revision)
@@ -41,7 +40,7 @@ def run_migration_scripts(
 
         # Run migration scripts
         if migration_type == 'pre':
-            module.pre_migrate(db)
+            module.pre_migrate()
         
         if migration_type == 'post':
-            module.post_migrate(db)
+            module.post_migrate()

@@ -10,8 +10,8 @@ class UserRoleBaseSerializer(BaseModel):
     scope: str | None
 
     @validator('scope', pre=True)
-    def is_valid_scope(cls, value):
-        """Validate scoper is a valid UserScopeTypes object"""
+    def is_valid_scope(cls, value) -> str | InvalidUserScopeType:
+        """Validate scope is a valid UserScopeTypes object"""
         for scope in UserScopeTypes:
             if scope.value == value:
                 return value
@@ -29,3 +29,4 @@ class UserRoleCreateSerializer(UserRoleBaseSerializer):
 
 class UserRoleUpdateSerializer(UserRoleBaseSerializer):
     username: str
+    scope: str

@@ -306,6 +306,7 @@ class ReadDao(Generic[ModelType]):
         db: Session, 
         **filters
     ) -> Optional[ModelType]:
+        import pdb; pdb.set_trace()
         query = db.query(self.model)
         filtered_query = _create_filtered_query(self.model, filters, query)
 
