@@ -41,7 +41,7 @@ def run_migration_scripts(
 
         # Run migration scripts
         if migration_type == 'pre':
-            module.pre_migrate()
+            module.pre_migrate(db)
         
         if migration_type == 'post':
-            module.post_migrate()
+            module.post_migrate(db)

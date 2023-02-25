@@ -19,3 +19,10 @@ class User(Base):
     )
     hashed_password: str = Column(String, nullable=False)
     business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
+
+    @property
+    def get_username(self):
+        if self.phone is None:
+            return self.email
+        else:
+            return self.phone
