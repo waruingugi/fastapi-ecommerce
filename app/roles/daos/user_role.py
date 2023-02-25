@@ -6,6 +6,8 @@ from app.roles.serializers.user_role import (
 )
 from app.roles.models import UserRole
 from app.roles.constants import UserPermissions
+from app.users.daos.user import user_dao
+from app.exceptions.custom import UserDoesNotExist
 
 
 class UserRoleDao(
@@ -25,5 +27,28 @@ class UserRoleDao(
 
             # Convert permissions to string and save to model
             values["_permissions"] = ', '.join(map(str, assign_perms))
+
+    
+    def get_or_create(
+        self, db: Session, obj_in: UserRoleUpdateSerializer,
+    ) -> UserRole:
+        """Get a role if it exists, otherwise create"""
+        user = user_dao.get_by_username(
+            db, username=obj_in.username
+        )
+        if not user:
+            raise UserDoesNotExist
+
+        user_role_obj = self.get(db, user_id=user.id)
+
+        if not user_role_obj:
+            new_user_role_obj = UserRoleCreateSerializer(
+                user_id=user.id,
+                name=obj_in.name,
+                scope=obj_in.scope
+            )
+            user_role_obj = self.create(db, obj_in=new_user_role_obj)
+
+        return user_role_obj
 
 user_role_dao = UserRoleDao(UserRole)

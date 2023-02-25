@@ -21,12 +21,4 @@ async def update_user_role(
     _: User = Depends(deps.get_current_active_superuser)
 ):
     """Update user role"""
-    user_in = user_dao.get_by_username(
-        db, username=role_in.phone
-    )
-    if not user_in:
-        raise UserDoesNotExist
-
-    user_role = user_role_dao.get_not_none(db, user_id=user_in.id)
-    
-    return user_role.update(db, db_obj=user_role, obj_in=role_in.dict())
+    return user_role_dao.get_or_create(db, obj_in=role_in)
