@@ -3,6 +3,7 @@ from pydantic import BaseModel, validator
 from typing import List
 from app.roles.constants import UserScopeTypes
 from app.exceptions.custom import InvalidUserScopeType
+from app.users.serializers.user import UserReadSerializer
 
 
 class UserRoleBaseSerializer(BaseModel):
@@ -20,7 +21,8 @@ class UserRoleBaseSerializer(BaseModel):
 
 
 class UserRoleInDBSerializer(InDBBaseSerializer, UserRoleBaseSerializer):
-    permissions: List[str] | None
+    user_id: str
+    user: UserReadSerializer
 
 
 class UserRoleCreateSerializer(UserRoleBaseSerializer):
