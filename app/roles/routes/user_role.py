@@ -30,8 +30,3 @@ async def update_user_role(
     user_role = user_role_dao.get_not_none(db, user_id=user_in.id)
     
     return user_role.update(db, db_obj=user_role, obj_in=role_in.dict())
-
-# Modify base permission to return list of perms
-# In route, check if perm is in defined roles
-# Assign user those roles
-# Create in db
