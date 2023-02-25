@@ -78,3 +78,9 @@ class ObjectDoesNotExist(Exception):
     """The specified object was not found"""
     def __init__(self, message: str) -> None:
         self.message = message
+
+
+class InvalidUserScopeType(Exception):
+    """The specified scope was not found in ´UserScopeTypes´"""
+    def __init__(self, message: str) -> None:
+        self.message = message
