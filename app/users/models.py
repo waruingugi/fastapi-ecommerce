@@ -21,8 +21,5 @@ class User(Base):
     business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
 
     @property
-    def get_username(self):
-        if self.phone is None:
-            return self.email
-        else:
-            return self.phone
+    def get_username(self) -> str:
+        return (self.phone if self.phone else self.email)

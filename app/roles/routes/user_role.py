@@ -22,3 +22,6 @@ async def update_user_role(
 ):
     """Update user role"""
     return user_role_dao.get_or_create(db, obj_in=role_in)
+
+# Alembic create role
+# On user create, create userrole

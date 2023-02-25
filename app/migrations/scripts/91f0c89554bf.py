@@ -1,5 +1,8 @@
 from app.roles.daos.user_role import user_role_dao
 from app.users.daos.user import user_dao
+from app.roles.serializers.user_role import UserRoleUpdateSerializer
+from app.users.constants import UserTypes
+from app.roles.constants import UserScopeTypes
 
 from sqlalchemy.orm import Session
 
@@ -12,6 +15,10 @@ def post_migrate(db: Session) -> None:
     all_users = user_dao.get_all(db)
 
     for user in all_users:
-        pass
-
-    print("I'm alive!")
+        username = user.get_username
+        user_role = UserRoleUpdateSerializer(
+            username=username,
+            name=UserTypes.CUSTOMER.value,
+            scope=UserScopeTypes.COUNTRY.value,
+        )
+        user_role_dao.get_or_create(db, obj_in=user_role)
