@@ -63,3 +63,18 @@ class InvalidToken(HttpErrorException):
             error_code=ErrorCodes.INVALID_TOKEN.name,
             error_message=ErrorCodes.INVALID_TOKEN.value,
         )
+
+
+class UserDoesNotExist(HttpErrorException):
+    def __init__(self) -> None:
+        super(UserDoesNotExist, self).__init__(
+            status_code=HTTPStatus.NOT_FOUND,
+            error_code=ErrorCodes.USER_NOT_FOUND.name,
+            error_message=ErrorCodes.USER_NOT_FOUND.value,
+        )
+
+
+class ObjectDoesNotExist(Exception):
+    """The specified object was not found"""
+    def __init__(self, message: str) -> None:
+        self.message = message
