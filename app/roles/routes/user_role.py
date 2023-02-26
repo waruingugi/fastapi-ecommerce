@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.roles.serializers.user_role import (
     UserRoleUpdateSerializer,
+    UserRoleInDBSerializer,
     UserRoleInDBSerializer
 )
 from app.users.models import User
@@ -25,6 +26,15 @@ async def create_user_role(
 ):
     """Update user role"""
     return user_role_dao.get_or_create(db, obj_in=role_in)
+
+
+@router.get("/roles", response_model=List[UserRoleInDBSerializer])
+async def read_user_roles(
+    db: Session = Depends(deps.get_db),
+    _: User = Depends(deps.get_current_active_superuser)
+):
+    """Read user roles"""
+    return user_role_dao.get_all(db)
 
 # Alembic create role
 # On user create, create userrole
