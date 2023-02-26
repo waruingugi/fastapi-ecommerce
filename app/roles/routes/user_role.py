@@ -8,7 +8,6 @@ from app.roles.serializers.user_role import (
     UserRoleInDBSerializer
 )
 from app.users.models import User
-from app.roles.constants import UserPermissions
 from typing import List
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
@@ -24,7 +23,7 @@ async def create_user_role(
     db: Session = Depends(deps.get_db),
     _: User = Depends(deps.get_current_active_superuser)
 ):
-    """Update user role"""
+    """Create user role"""
     return user_role_dao.get_or_create(db, obj_in=role_in)
 
 
@@ -36,5 +35,8 @@ async def read_user_roles(
     """Read user roles"""
     return user_role_dao.get_all(db)
 
-# Alembic create role
-# On user create, create userrole
+
+# Permissions: use in dependencies
+# Logger
+# Search query
+# TSVector

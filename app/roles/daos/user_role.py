@@ -5,7 +5,7 @@ from app.roles.serializers.user_role import (
     UserRoleCreateSerializer
 )
 from app.roles.models import UserRole
-from app.roles.constants import UserPermissions
+from app.roles.constants import UserRolePermissions
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
 
@@ -17,7 +17,7 @@ class UserRoleDao(
         """Generate permissions from role"""
         assign_perms = []
         if not permissions:
-            for perm in UserPermissions:
+            for perm in UserRolePermissions:
                 if role_name == perm.name:
                     assign_perms.append(perm.value)
 
