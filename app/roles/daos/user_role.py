@@ -19,11 +19,12 @@ class UserRoleDao(
         if not permissions:
             for perm in UserRolePermissions:
                 if role_name == perm.name:
-                    assign_perms.append(perm.value)
+                    assign_perms.extend(perm.value)  # Use extend to individually add list values to list
 
         # Return permissions as string
+        # Use set() to ensure only unique string values are returned
         return (
-            ', '.join(map(str, assign_perms)) if assign_perms else ''
+            ', '.join(map(str, set(assign_perms))) if assign_perms else ''
         )
 
     def on_pre_create(self, db: Session, id: str, values: dict, orig_values: dict) -> None:

@@ -19,6 +19,6 @@ class UserRole(Base):
 
     @property
     def permissions(self) -> List[str]:
-        if self.permissions:
+        if self._permissions:
             return self._permissions.replace(" ", "").split(",")
         return []

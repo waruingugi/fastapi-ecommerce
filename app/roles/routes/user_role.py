@@ -12,6 +12,7 @@ from typing import List
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
 from app.roles.daos.user_role import user_role_dao
+from app.roles.permissions import UserRolePermissions
 
 
 router = APIRouter()
@@ -30,13 +31,22 @@ async def create_user_role(
 @router.get("/roles", response_model=List[UserRoleInDBSerializer])
 async def read_user_roles(
     db: Session = Depends(deps.get_db),
-    _: User = Depends(deps.get_current_active_superuser)
+    _: User = Depends(deps.get_current_active_superuser),
+    permissions: deps.Permissions = Depends(deps.Permissions(UserRolePermissions.user_role_list))
 ):
     """Read user roles"""
     return user_role_dao.get_all(db)
 
 
 # Permissions: use in dependencies
+# - Permissions class
+# - Calls permission check func
+# - In check func
+# - search user_id in permissions
+# - Get permissions in role
+# - Check role has specified in permissions
+
 # Logger
+# Black and coding
 # Search query
 # TSVector
