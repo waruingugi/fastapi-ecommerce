@@ -5,7 +5,7 @@ from app.users.permissions import UserPermissions
 from enum import Enum
 from app.roles.permissions import UserRolePermissions
 
-
+# Organize Permissions in hierarchy structure
 CorePermissions: List[str] = [
     UserPermissions.user_read.value,
     UserPermissions.user_update.value,

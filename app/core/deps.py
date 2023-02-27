@@ -18,7 +18,8 @@ from app.exceptions.custom import (
     ExpiredRefreshToken,
     ExpiredAccessToken,
     IncorrectCredentials,
-    InvalidToken
+    InvalidToken,
+    AccessDenied
 )
 from app.users.models import User
 from app.auth.utils.token import (
@@ -116,7 +117,6 @@ class Permissions:
 
         required_perms = [perm.value for perm in self.perms]
 
-        for perm in role.permissions:
-            if perm not in  required_perms:
-                pass
-                # raise AccessDenied
+        for perm in required_perms:
+            if perm not in role.permissions:
+                raise AccessDenied

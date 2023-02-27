@@ -14,3 +14,4 @@ class ErrorCodes(str, Enum):
     EXPIRED_AUTHORIZATION_TOKEN = "The authorization token expired"
     INVALID_TOKEN = "Could not validate your token"
     USER_NOT_FOUND = "This user does not exist in the system"
+    ACCESS_DENIED = "You are not permitted to perform this action"
