@@ -45,6 +45,8 @@ async def read_user_roles(
 # - search user_id in permissions
 # - Get permissions in role
 # - Check role has specified in permissions
+# Customer
+# Violates foreign key constraint
 
 # Logger
 # Black and coding

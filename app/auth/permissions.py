@@ -7,10 +7,12 @@ from app.roles.permissions import UserRolePermissions
 
 # Organize Permissions in hierarchy structure
 CorePermissions: List[str] = [
-    UserPermissions.user_read.value,
-    UserPermissions.user_update.value,
-    BusinessPartnerPermissions.business_partner_create.value,
     BusinessPartnerPermissions.business_partner_read.value
+]
+
+
+CustomerPermissions: List[str] = [
+    BusinessPartnerPermissions.business_partner_read.value,
 ]
 
 
