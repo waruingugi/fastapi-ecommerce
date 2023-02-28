@@ -1,6 +1,7 @@
 from typing import Generator, AsyncGenerator, List
 
 from app.db.session import SessionLocal, AsyncSessionLocal
+from app.db.permissions import BasePermission
 from fastapi import Depends, HTTPException, Security, status
 from fastapi.security import (
     OAuth2PasswordBearer,
@@ -17,15 +18,15 @@ from app.exceptions.custom import (
     ExpiredRefreshToken,
     ExpiredAccessToken,
     IncorrectCredentials,
-    InvalidToken
+    InvalidToken,
+    AccessDenied
 )
 from app.users.models import User
 from app.auth.utils.token import (
     check_refresh_token_is_valid,
     check_access_token_is_valid
 )
-from app.auth.serializers.token import TokenReadSerializer
-
+from app.roles.daos.user_role import user_role_dao
 
 class TokenData(BaseModel):
     username: str | None = None
@@ -101,3 +102,21 @@ async def get_current_active_superuser(
     if not user_dao.is_superuser(current_user):
         raise InsufficientUserPrivileges
     return current_user
+
+
+class Permissions:
+    def __init__(self, *perms: BasePermission) -> None:
+        self.perms = perms
+
+    async def __call__(
+        self,
+        db: Session = Depends(get_db),
+        token_payload: dict = Depends(get_decoded_token)
+    ):
+        role = user_role_dao.get(db, user_id=token_payload["user_id"])
+
+        required_perms = [perm.value for perm in self.perms]
+
+        for perm in required_perms:
+            if perm not in role.permissions:
+                raise AccessDenied

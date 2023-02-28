@@ -84,3 +84,12 @@ class InvalidUserScopeType(Exception):
     """The specified scope was not found in ´UserScopeTypes´"""
     def __init__(self, message: str) -> None:
         self.message = message
+
+
+class AccessDenied(HttpErrorException):
+    def __init__(self) -> None:
+        super(AccessDenied, self).__init__(
+            status_code=HTTPStatus.FORBIDDEN,
+            error_code=ErrorCodes.ACCESS_DENIED.name,
+            error_message=ErrorCodes.ACCESS_DENIED.value,
+        )

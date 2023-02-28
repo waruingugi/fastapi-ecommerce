@@ -4,14 +4,15 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 from app.roles.serializers.user_role import (
     UserRoleUpdateSerializer,
+    UserRoleInDBSerializer,
     UserRoleInDBSerializer
 )
 from app.users.models import User
-from app.roles.constants import UserPermissions
 from typing import List
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
 from app.roles.daos.user_role import user_role_dao
+from app.roles.permissions import UserRolePermissions
 
 
 router = APIRouter()
@@ -23,8 +24,31 @@ async def create_user_role(
     db: Session = Depends(deps.get_db),
     _: User = Depends(deps.get_current_active_superuser)
 ):
-    """Update user role"""
+    """Create user role"""
     return user_role_dao.get_or_create(db, obj_in=role_in)
 
-# Alembic create role
-# On user create, create userrole
+
+@router.get("/roles", response_model=List[UserRoleInDBSerializer])
+async def read_user_roles(
+    db: Session = Depends(deps.get_db),
+    _: User = Depends(deps.get_current_active_superuser),
+    permissions: deps.Permissions = Depends(deps.Permissions(UserRolePermissions.user_role_list))
+):
+    """Read user roles"""
+    return user_role_dao.get_all(db)
+
+
+# Permissions: use in dependencies
+# - Permissions class
+# - Calls permission check func
+# - In check func
+# - search user_id in permissions
+# - Get permissions in role
+# - Check role has specified in permissions
+# Customer
+# Violates foreign key constraint
+
+# Logger
+# Black and coding
+# Search query
+# TSVector

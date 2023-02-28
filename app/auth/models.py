@@ -19,7 +19,7 @@ from typing import List
 class AuthToken(Base):
     access_token: str = Column(String, nullable=False)
     refresh_token = Column(String, nullable=True)
-    user_id = Column(String, ForeignKey("user.id"))
+    user_id = Column(String, ForeignKey("user.id", ondelete='CASCADE'))
     token_type: str = Column(String, nullable=False)
     is_active = Column(Boolean, nullable=False, default=True)
     access_token_eat: datetime = Column(DateTime, nullable=False)

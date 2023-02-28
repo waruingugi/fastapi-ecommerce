@@ -1,5 +1,9 @@
 from enum import Enum
-from app.roles.permissions import AdminPermissions, CorePermissions
+from app.auth.permissions import (
+    AdminPermissions,
+    CustomerPermissions,
+    SuperAdminPermissions
+)
 
 
 class UserScopeTypes(str, Enum):
@@ -9,6 +13,7 @@ class UserScopeTypes(str, Enum):
     AREA = "AREA"
 
 
-class UserPermissions(Enum):
+class UserRolePermissions(Enum):
+    SUPERADMIN = SuperAdminPermissions
     ADMIN = AdminPermissions
-    CUSTOMER = CorePermissions
+    CUSTOMER = CustomerPermissions

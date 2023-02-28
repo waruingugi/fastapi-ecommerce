@@ -5,7 +5,7 @@ from app.roles.serializers.user_role import (
     UserRoleCreateSerializer
 )
 from app.roles.models import UserRole
-from app.roles.constants import UserPermissions
+from app.roles.constants import UserRolePermissions
 from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
 
@@ -17,13 +17,14 @@ class UserRoleDao(
         """Generate permissions from role"""
         assign_perms = []
         if not permissions:
-            for perm in UserPermissions:
+            for perm in UserRolePermissions:
                 if role_name == perm.name:
-                    assign_perms.append(perm.value)
+                    assign_perms.extend(perm.value)  # Use extend to individually add list values to list
 
         # Return permissions as string
+        # Use set() to ensure only unique string values are returned
         return (
-            ', '.join(map(str, assign_perms)) if assign_perms else ''
+            ', '.join(map(str, set(assign_perms))) if assign_perms else ''
         )
 
     def on_pre_create(self, db: Session, id: str, values: dict, orig_values: dict) -> None:
