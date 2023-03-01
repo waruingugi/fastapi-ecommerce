@@ -2,7 +2,7 @@ from typing import Generator, AsyncGenerator, List
 
 from app.db.session import SessionLocal, AsyncSessionLocal
 from app.db.permissions import BasePermission
-from fastapi import Depends, Response, Security, status
+from fastapi import Depends, Response, Security
 from fastapi.security import (
     OAuth2PasswordBearer,
     SecurityScopes,

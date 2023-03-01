@@ -1,36 +1,21 @@
-import logging
-import sys
-from functools import lru_cache
-from typing import cast, Callable, Dict
+from typing import Callable
 
 from fastapi.routing import APIRoute
-from fastapi import Depends, Request, Response
+from fastapi import Request, Response
 from fastapi import BackgroundTasks
 
-
-logging.basicConfig(
-    level=logging.INFO,
-    handlers=[logging.StreamHandler(sys.stdout)],
-    format="[%(asctime)s] %(levelname)s - %(message)s"
-)
-
-@lru_cache
-def instantiate_logger() -> logging.Logger:
-    logger_ = logging.getLogger(__name__)
-
-    return logger_
-
-
-logger = cast(logging.Logger, instantiate_logger())
+from app.core.raw_logger import logger
 
 
 RESTRICTED_PAYLOAD_URLS = [
     "auth/access-token",
     "auth/login",
+    "auth/refresh-token",
 ]
 
 
 class LoggingRoute(APIRoute):
+    """Log every request and response from the API"""
     def get_route_handler(self) -> Callable:
         original_route_handler = super().get_route_handler()
 
@@ -43,9 +28,26 @@ class LoggingRoute(APIRoute):
 
             response_log_data = dict(
                 status_code=response.status_code,
-                request_id=request.headers.get("X-Request-ID", None)
+                response_id=request.headers.get('x-request-id', None),
+                user_id=response.headers.get('x-user-id', None),
             )
-            import pdb; pdb.set_trace()
+
+            request_identifier = f"by {response_log_data['user_id']}"
+
+            # Identify request by user_id or request_id/response_id
+            request_identifier = (
+                f"User {response_log_data['user_id']}" if response_log_data['user_id']
+                else f"ID {response_log_data['response_id']}"
+            )
+
+            response.background.add_task(  # type: ignore [attr-defined]
+                logger.info,
+                f"Request {request_identifier}: {request_log_data}"
+            )
+            response.background.add_task(  # type: ignore [attr-defined]
+                logger.info,
+                f"Response {request_identifier}: {response_log_data}"
+            )
 
             return response
 
