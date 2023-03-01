@@ -27,6 +27,11 @@ sqlalchemy = "^2.0.3"
 asgi-correlation-id = "^4.1.0"
 
 
+[tool.poetry.group.dev.dependencies]
+flake8 = "^6.0.0"
+black = "^23.1.0"
+pre-commit = "^3.1.1"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
