@@ -2,7 +2,7 @@ from typing import Generator, AsyncGenerator, List
 
 from app.db.session import SessionLocal, AsyncSessionLocal
 from app.db.permissions import BasePermission
-from fastapi import Depends, HTTPException, Security, status
+from fastapi import Depends, Response, Security, status
 from fastapi.security import (
     OAuth2PasswordBearer,
     SecurityScopes,
@@ -50,6 +50,7 @@ async def get_async_db() -> AsyncGenerator:
 
 
 async def get_decoded_token(
+    response: Response,
     db: Session = Depends(get_db),
     token: str = Depends(oauth2_scheme),
 ) -> dict:
@@ -63,7 +64,9 @@ async def get_decoded_token(
                 algorithms=[settings.ALGORITHM],
                 options={"verify_exp": True}
             )
- 
+            
+            # ´x-user-id´ response header is used in logging
+            response.headers["x-user-id"] = payload["user_id"]
             return payload
         except (JWTError, ValidationError):
             raise InvalidToken
