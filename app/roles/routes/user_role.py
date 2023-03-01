@@ -37,7 +37,6 @@ async def read_user_roles(
     """Read user roles"""
     return user_role_dao.get_all(db)
 
-
 # Black and coding
 # Search query
 # TSVector
