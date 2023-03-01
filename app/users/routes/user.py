@@ -1,5 +1,5 @@
 import fastapi
-from fastapi import Depends, Query
+from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 from app.users.serializers.user import UserInDBSerializer, UserCreateSerializer
 from sqlalchemy.orm import Session
@@ -13,9 +13,9 @@ from app.db.serializer import SearchParam
 from app.users.filters import UserFilter
 from app.core import deps
 from app.users.models import User
+from app.core.logger import LoggingRoute
 
-
-router = fastapi.APIRouter()
+router = APIRouter(route_class=LoggingRoute)
 
 
 @router.get("/users/me", response_model=UserInDBSerializer)
