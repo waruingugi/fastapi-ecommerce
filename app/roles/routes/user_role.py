@@ -38,18 +38,7 @@ async def read_user_roles(
     return user_role_dao.get_all(db)
 
 
-# Permissions: use in dependencies
-# - Permissions class
-# - Calls permission check func
-# - In check func
-# - search user_id in permissions
-# - Get permissions in role
-# - Check role has specified in permissions
-# Customer
-# Violates foreign key constraint
-
-# Logger
-# Permissions: put roles in token
 # Black and coding
 # Search query
 # TSVector
+# Redis

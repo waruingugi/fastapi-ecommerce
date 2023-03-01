@@ -1,5 +1,5 @@
 import fastapi
-from fastapi import Depends, Query
+from fastapi import Depends, APIRouter
 from app.core.deps import get_db
 from app.business_partner.serializers.business_partner import (
     BusinessPartnerInDBSerializer,
@@ -16,9 +16,9 @@ from http import HTTPStatus
 from app.users.daos.user import user_dao
 from app.core import deps
 from app.users.models import User
+from app.core.logger import LoggingRoute
 
-
-router = fastapi.APIRouter()
+router = APIRouter(route_class=LoggingRoute)
 
 
 @router.get("/business-partner", response_model=List[BusinessPartnerInDBSerializer])
