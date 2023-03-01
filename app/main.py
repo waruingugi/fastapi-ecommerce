@@ -6,6 +6,7 @@ from app.auth import api as auth_api
 from app.business_partner import api as business_partner_api
 from app.roles import api as roles_api
 from typing import Any
+from starlette.middleware.cors import CORSMiddleware
 
 
 def get_application() -> FastAPI:
@@ -22,7 +23,6 @@ def get_application() -> FastAPI:
     application.include_router(roles_api.router, prefix=settings.API_V1_STR)
     application.include_router(user_api.router, prefix=settings.API_V1_STR)
     application.include_router(business_partner_api.router, prefix=settings.API_V1_STR)
-
 
     return application
 

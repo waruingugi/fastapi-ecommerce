@@ -5,6 +5,7 @@ from typing import cast, Callable, Dict
 
 from fastapi.routing import APIRoute
 from fastapi import Depends, Request, Response
+from fastapi import BackgroundTasks
 
 
 logging.basicConfig(
@@ -35,6 +36,20 @@ class LoggingRoute(APIRoute):
 
         async def custom_route_handler(request: Request) -> Response:
             request_log_data = await prepare_request_logging_data(request)
+            response: Response = await original_route_handler(request)
+
+            if not response.background:
+                response.background = BackgroundTasks()
+
+            response_log_data = dict(
+                status_code=response.status_code,
+                request_id=request.headers.get("X-Request-ID", None)
+            )
+            import pdb; pdb.set_trace()
+
+            return response
+
+        return custom_route_handler
 
 
 def should_log_payload(request: Request) -> bool:
