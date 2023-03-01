@@ -13,7 +13,7 @@ from app.users.daos.user import user_dao
 from app.exceptions.custom import UserDoesNotExist
 from app.roles.daos.user_role import user_role_dao
 from app.roles.permissions import UserRolePermissions
-
+from app.core.logger import logger
 
 router = APIRouter()
 
@@ -49,6 +49,7 @@ async def read_user_roles(
 # Violates foreign key constraint
 
 # Logger
+# Permissions: put roles in token
 # Black and coding
 # Search query
 # TSVector
