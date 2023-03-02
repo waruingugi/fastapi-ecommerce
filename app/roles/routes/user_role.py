@@ -40,5 +40,6 @@ async def read_user_roles(
 # Search query
 # - Modify get
 # - Make sqlalchemy filters work
+# - Delete filters file
 # TSVector
 # Redis
