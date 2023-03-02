@@ -58,13 +58,17 @@ class BaseFilterModel(BaseModel, extra=Extra.forbid):
     @property
     def ordering_values(self):
         """Check that the ordering field is present on the class definition."""
-        try:
+        if hasattr(self, self.Constants.ordering_field_name):
             return getattr(self, self.Constants.ordering_field_name)
-        except AttributeError:
-            raise AttributeError(
-                f"Ordering field {self.Constants.ordering_field_name} is not defined. "
-                "Make sure to add it to your filter class."
-            )
+        return None
+        # Modified to above ^^^^
+        # try:
+        #     return getattr(self, self.Constants.ordering_field_name)
+        # except AttributeError:
+        #     raise AttributeError(
+        #         f"Ordering field {self.Constants.ordering_field_name} is not defined. "
+        #         "Make sure to add it to your filter class."
+        #     )
 
     @validator("*", pre=True)
     def split_str(cls, value, field):  # pragma: no cover

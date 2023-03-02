@@ -24,6 +24,7 @@ from app.exceptions.custom import HttpErrorException, ObjectDoesNotExist
 from app.errors.custom import ErrorCodes
 from http import HTTPStatus
 from app.core.raw_logger import logger
+from app.filters import Filter
 
 
 ModelType = TypeVar("ModelType", bound=Base)
@@ -306,6 +307,14 @@ class ReadDao(Generic[ModelType]):
 
         query = db.query(self.model)
         return query.filter_by(**filters).first()
+
+    def search(self, db: Session, search_filter: Filter):
+        query = select(self.model)
+
+        query = search_filter.filter(query)
+        query = search_filter.sort(query)
+
+        return db.scalars(query).all()
 
 
 class CRUDDao(

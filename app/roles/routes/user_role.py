@@ -37,6 +37,7 @@ async def read_user_roles(
     ),
 ):
     """Read user roles"""
+    user_role_dao.search(db, user_role_filter)
     return user_role_dao.get_all(db)
 
 

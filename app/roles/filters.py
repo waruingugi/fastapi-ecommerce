@@ -9,4 +9,3 @@ class UserRoleFilter(Filter):
 
     class Constants(Filter.Constants):
         model = UserRole
-        search_model_fields = ["name"]
