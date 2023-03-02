@@ -8,13 +8,11 @@ from typing import (
     TypeVar,
     Union,
     Protocol,
-    TypedDict
+    TypedDict,
 )
-
-from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
-from sqlalchemy import Column, insert, inspect, update
+from sqlalchemy import insert, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import get_hybrid_properties
 from sqlalchemy.future import select
@@ -24,14 +22,15 @@ from datetime import datetime
 from app.db.base_class import Base, generate_uuid
 from app.exceptions.custom import HttpErrorException, ObjectDoesNotExist
 from app.errors.custom import ErrorCodes
-from app.db.filters import _create_filtered_query
 from http import HTTPStatus
+from app.core.raw_logger import logger
 
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
 FilterType = TypeVar("FilterType")
+
 
 # Class that we can use to keep track of the changes in an object
 class ChangeAttrState(TypedDict):
@@ -44,8 +43,10 @@ ChangedObjState = Dict[str, ChangeAttrState]
 
 class DaoInterface(Protocol[ModelType]):
     """
-    Parent class uses ´Protocol´ which ensures child classes inherit the same functions or structure.
+    Parent class uses ´Protocol´ which ensures child classes inherit
+    the same functions or structure.
     """
+
     model: ModelType
 
     def on_relationship(
@@ -55,17 +56,13 @@ class DaoInterface(Protocol[ModelType]):
         id: str,
         values: dict,
         db_obj: Optional[ModelType] = None,
-        create: bool = True
+        create: bool = True,
     ) -> None:
         pass
 
-    def get_not_none(
-        self,
-        db: Session,
-        **filters: Any
-    ) -> ModelType:
+    def get_not_none(self, db: Session, **filters: Any) -> ModelType:
         pass
-    
+
     def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
         pass
 
@@ -75,13 +72,19 @@ class DaoInterface(Protocol[ModelType]):
     def get_or_none(self, db: Session, **filters: Any) -> ModelType:
         pass
 
-    def on_pre_create(self, db: Session, id: str, values: dict, orig_values: dict) -> None:
+    def on_pre_create(
+        self, db: Session, id: str, values: dict, orig_values: dict
+    ) -> None:
         pass
 
-    def on_post_create(self, db: Session, db_obj: Union[ModelType, List[ModelType]]) -> None:
+    def on_post_create(
+        self, db: Session, db_obj: Union[ModelType, List[ModelType]]
+    ) -> None:
         pass
 
-    def on_pre_update(self, db: Session, db_obj: ModelType, values: dict, orig_values: dict) -> None:
+    def on_pre_update(
+        self, db: Session, db_obj: ModelType, values: dict, orig_values: dict
+    ) -> None:
         pass
 
     def on_post_update(
@@ -124,13 +127,14 @@ class CreateDao(Generic[ModelType, CreateSerializer]):
 
             if hasattr(self, "on_relationship"):
                 self.on_relationship(db, id=obj_id, values=orig_data)
- 
+
             db.commit()
             db_obj = self.get(db, id=obj_id)
             self.on_post_create(db, db_obj)
 
             return db_obj
         except IntegrityError as integrity_error:
+            logger.warning(integrity_error)
             db.rollback()
 
     def on_pre_create(
@@ -154,7 +158,7 @@ class UpdateDao(Generic[ModelType, UpdateSerializer]):
         db: Session,
         *,
         db_obj: ModelType,
-        obj_in: Union[UpdateSerializer, Dict[str, Any]]
+        obj_in: Union[UpdateSerializer, Dict[str, Any]],
     ) -> ModelType:
         if isinstance(obj_in, dict):
             update_data = obj_in
@@ -166,12 +170,12 @@ class UpdateDao(Generic[ModelType, UpdateSerializer]):
             raise HttpErrorException(
                 status_code=HTTPStatus.BAD_REQUEST,
                 error_code=ErrorCodes.NO_CHANGES_DETECTED.name,
-                error_message=ErrorCodes.NO_CHANGES_DETECTED.value
+                error_message=ErrorCodes.NO_CHANGES_DETECTED.value,
             )
 
         if "created_at" in update_data:
             del update_data["created_at"]
-        
+
         if not hasattr(db_obj, "updated_at"):
             update_data["update_at"] = datetime.now()
 
@@ -226,17 +230,18 @@ class UpdateDao(Generic[ModelType, UpdateSerializer]):
 
         try:
             db.commit()
-            
+
             updated_db_obj = self.get_not_none(db, id=db_obj.id)
             self.on_post_update(db, updated_db_obj, changed_obj_state)
 
             return updated_db_obj
         except IntegrityError as integrity_error:
             db.rollback()
+            logger.warning(integrity_error)
             raise
 
     def on_pre_update(
-        self, db: Session, db_obj: ModelType, values: dict, orig_values: dict 
+        self, db: Session, db_obj: ModelType, values: dict, orig_values: dict
     ) -> None:
         pass
 
@@ -275,14 +280,10 @@ class ReadDao(Generic[ModelType]):
     ):
         self.model = model
 
-    def get_not_none(
-        self,
-        db: Session,
-        **filters
-    ) -> ModelType:
+    def get_not_none(self, db: Session, **filters) -> ModelType:
         obj = self.get(db, **filters)
         if not obj:
-            raise  ObjectDoesNotExist(f"Object with filters {filters} not found")
+            raise ObjectDoesNotExist(f"Object with filters {filters} not found")
         return obj
 
     def get_all(
@@ -297,81 +298,21 @@ class ReadDao(Generic[ModelType]):
         return db.scalars(query.where(self.model.id.in_(ids))).all()
 
     def exists(self, db: Session, id: str) -> bool:
-        return (
-            db.scalars(select(self.model.id).filter_by(id=id).limit(1)).first()
-        )
+        return db.scalars(select(self.model.id).filter_by(id=id)).first()
 
     def get(
-        self: Union[Any, DaoInterface],
-        db: Session, 
-        **filters
+        self: Union[Any, DaoInterface], db: Session, **filters
     ) -> Optional[ModelType]:
-        query = db.query(self.model)
-        filtered_query = _create_filtered_query(self.model, filters, query)
 
-        return filtered_query.first()
+        query = db.query(self.model)
+        return query.filter_by(**filters).first()
 
 
 class CRUDDao(
     CreateDao[ModelType, CreateSerializer],
     UpdateDao[ModelType, UpdateSerializer],
     DeleteDao[ModelType],
-    ReadDao[ModelType]
+    ReadDao[ModelType],
 ):
-    def __init__(
-        self,
-        model: Type[ModelType]
-    ):
+    def __init__(self, model: Type[ModelType]):
         super().__init__(model)
-# END
-
-
-
-# class CRUDBase(Generic[ModelType, CreateSerializer, UpdateSerializer]):
-#     def __init__(self, model: Type[ModelType]):
-#         """
-#         CRUD object with default methods to Create, Read, Update, Delete (CRUD)
-#         """
-#         self.model = model
-
-#     def get(self, db: Session, id: str | int) -> Optional[ModelType]:
-#         return db.query(self.model).filter(self.model.id == id).first()
-
-#     def get_multi(
-#         self, db: Session, *, skip: int = 0, limit: int = 100
-#     ) -> List[ModelType]:
-#         return db.query(self.model).offset(skip).limit(limit).all()
-
-#     def create(self, db: Session, *, obj_in: CreateSerializer) -> ModelType:
-#         obj_in_data = jsonable_encoder(obj_in)
-#         db_obj = self.model(**obj_in_data)
-#         db.add(db_obj)
-#         db.commit()
-#         db.refresh(db_obj)
-#         return db_obj
-    
-#     def update(
-#         self, db: Session, *, db_obj: ModelType, obj_in: Union[UpdateSerializer, Dict[str, Any]]
-#     ) -> ModelType:
-#         obj_data = jsonable_encoder(db_obj)
-#         if isinstance(obj_in, dict):
-#             update_data = obj_in
-#         else:
-#             update_data = obj_in.dict(exclude_unset=True)
-
-#         for field in obj_data:
-#             if field in update_data:
-#                 setattr(db_obj, field, update_data[field])
-
-#         db.add(db_obj)
-#         db.commit()
-#         db.refresh(db_obj)
-
-#         return db_obj
-
-#     def remove(self, db: Session, *, id: int) -> ModelType:
-#         obj = db.query(self.model).get(id)
-#         db.delete(obj)
-
-#         db.commit()
-#         return obj
