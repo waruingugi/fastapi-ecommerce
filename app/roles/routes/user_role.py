@@ -11,6 +11,8 @@ from typing import List
 from app.roles.daos.user_role import user_role_dao
 from app.roles.permissions import UserRolePermissions
 from app.core.logger import LoggingRoute
+from app.roles.filters import UserRoleFilter
+from app.filters import FilterDepends
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -27,6 +29,7 @@ async def create_user_role(
 
 @router.get("/roles", response_model=List[UserRoleInDBSerializer])
 async def read_user_roles(
+    user_role_filter: UserRoleFilter = FilterDepends(UserRoleFilter),
     db: Session = Depends(deps.get_db),
     _: User = Depends(deps.get_current_active_superuser),
     permissions: deps.Permissions = Depends(
