@@ -37,7 +37,8 @@ async def read_user_roles(
     return user_role_dao.get_all(db)
 
 
-# Black and coding
 # Search query
+# - Modify get
+# - Make sqlalchemy filters work
 # TSVector
 # Redis
