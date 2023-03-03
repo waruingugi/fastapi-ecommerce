@@ -26,11 +26,9 @@ from http import HTTPStatus
 from app.core.raw_logger import logger
 from app.filters import Filter
 
-
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
-FilterType = TypeVar("FilterType")
 
 
 # Class that we can use to keep track of the changes in an object
@@ -308,7 +306,7 @@ class ReadDao(Generic[ModelType]):
         query = db.query(self.model)
         return query.filter_by(**filters).first()
 
-    def search(self, db: Session, search_filter: Filter):
+    def search(self: Union[Any, DaoInterface], db: Session, search_filter: Filter):
         query = select(self.model)
 
         query = search_filter.filter(query)
