@@ -2,7 +2,6 @@ from sqlalchemy import Column, ForeignKey, String, Boolean
 from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base
 from app.business_partner.constants import BusinessTypes, BusinessVerificationStates
-from sqlalchemy.ext.hybrid import hybrid_property
 
 
 class BusinessPartner(Base):
@@ -27,7 +26,7 @@ class BusinessPartner(Base):
     # country
     # currency
 
-    @hybrid_property
+    @property
     def contact(self):
         if self.phone is not None:
             return self.phone

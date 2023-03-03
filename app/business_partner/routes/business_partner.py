@@ -21,14 +21,22 @@ router = APIRouter(route_class=LoggingRoute)
 
 @router.get("/business-partner", response_model=List[BusinessPartnerInDBSerializer])
 async def read_business_partners(
-    business_partner_filter: BusinessPartnerFilter = FilterDepends(
-        BusinessPartnerFilter
-    ),
+    bp_filter: BusinessPartnerFilter = FilterDepends(BusinessPartnerFilter),
     db: Session = Depends(get_db),
     _: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """Read business partners"""
-    return business_partner_dao.get_all(db)
+
+    """Read user roles"""
+    bp_filter_dict = bp_filter.dict()
+    import pdb
+
+    pdb.set_trace()
+
+    if not any(bp_filter_dict.values()):  # Returns True if all values are falsy/None
+        return business_partner_dao.get_all(db)
+
+    return business_partner_dao.search(db, bp_filter)
 
 
 @router.post("/business-partner", response_model=BusinessPartnerInDBSerializer)
