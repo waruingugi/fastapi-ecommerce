@@ -26,13 +26,7 @@ async def read_business_partners(
     _: User = Depends(deps.get_current_active_user),
 ) -> Any:
     """Read business partners"""
-
-    """Read user roles"""
     bp_filter_dict = bp_filter.dict()
-    import pdb
-
-    pdb.set_trace()
-
     if not any(bp_filter_dict.values()):  # Returns True if all values are falsy/None
         return business_partner_dao.get_all(db)
 
