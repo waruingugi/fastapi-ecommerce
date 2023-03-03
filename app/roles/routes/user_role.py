@@ -11,6 +11,8 @@ from typing import List
 from app.roles.daos.user_role import user_role_dao
 from app.roles.permissions import UserRolePermissions
 from app.core.logger import LoggingRoute
+from app.roles.filters import UserRoleFilter
+from fastapi_sqlalchemy_filter import FilterDepends
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -27,18 +29,27 @@ async def create_user_role(
 
 @router.get("/roles", response_model=List[UserRoleInDBSerializer])
 async def read_user_roles(
+    user_role_filter: UserRoleFilter = FilterDepends(UserRoleFilter),
     db: Session = Depends(deps.get_db),
-    _: User = Depends(deps.get_current_active_superuser),
-    permissions: deps.Permissions = Depends(
-        deps.Permissions(UserRolePermissions.user_role_list)
-    ),
+    user: User = Depends(deps.get_current_active_superuser),
+    _: deps.Permissions = Depends(deps.Permissions(UserRolePermissions.user_role_list)),
 ):
     """Read user roles"""
-    return user_role_dao.get_all(db)
+    user_role_filter_dict = user_role_filter.dict()
+
+    if not any(
+        user_role_filter_dict.values()
+    ):  # Returns True if all values are falsy/None
+        return user_role_dao.get_all(db)
+
+    return user_role_dao.search(db, user_role_filter)
 
 
 # Search query
 # - Modify get
 # - Make sqlalchemy filters work
-# TSVector
+# - Delete filters file
+# - Ordering filter
+# - Hybrid properties
+# - Load only defer
 # Redis

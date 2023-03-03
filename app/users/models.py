@@ -1,10 +1,7 @@
-from sqlalchemy import Column, Integer, String, Boolean, Index, DateTime
+from sqlalchemy import Column, String, Boolean, DateTime
 from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base, get_current_datetime
 from app.users.constants import UserTypes
-from enum import Enum
-from app.core.security import get_password_hash
-from app.business_partner.models import BusinessPartner
 
 
 class User(Base):
@@ -14,13 +11,13 @@ class User(Base):
     phone: Mapped[str] = Column(String, nullable=False, index=True)
     email: str = Column(String, unique=True, index=True, nullable=True)
     is_active = Column(Boolean, default=False)
-    user_type = Column(
-        String, default=UserTypes.CUSTOMER.value
-    )
+    user_type = Column(String, default=UserTypes.CUSTOMER.value)
     hashed_password: str = Column(String, nullable=False)
 
-    business_memberships = relationship("BusinessPartner", back_populates="owner", uselist=True)
+    business_memberships = relationship(
+        "BusinessPartner", back_populates="owner", uselist=True
+    )
 
     @property
     def get_username(self) -> str:
-        return (self.phone if self.phone else self.email)
+        return self.phone if self.phone else self.email

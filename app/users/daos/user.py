@@ -2,17 +2,16 @@ from typing import Optional, Union, Any, Dict
 
 from sqlalchemy.orm import Session
 
-from app.db.dao import CRUDDao, FilterType, ModelType
+from app.db.dao import CRUDDao
 from app.users.models import User
 from app.users.serializers.user import (
     UserCreateSerializer,
     UserUpdateSerializer,
-    UserBaseSerializer
+    UserBaseSerializer,
 )
 from app.users.constants import UserTypes
 from app.core.security import get_password_hash, verify_password
 from pyisemail import is_email
-from app.db.serializer import SearchParam
 
 
 class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
@@ -36,13 +35,11 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
             return self.get(db, email=username)
         else:
             return self.get(db, phone=username)
-    
+
     def get_or_create(
-        self, db: Session,
-        obj_in: Union[
-            UserBaseSerializer,
-            UserCreateSerializer
-        ],
+        self,
+        db: Session,
+        obj_in: Union[UserBaseSerializer, UserCreateSerializer],
     ) -> User:
         """Get or create a user"""
         user_in = user_dao.get_by_phone_or_email(
@@ -65,9 +62,7 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         db.commit()
         return db_obj
 
-    def authenticate_user(
-        self, db: Session, *, username: str, password: str
-    ):
+    def authenticate_user(self, db: Session, *, username: str, password: str):
         user = self.get_by_username(db, username=username)
         if not user:
             return False
@@ -76,7 +71,11 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         return user
 
     def update(
-        self, db: Session, *, db_obj: User, obj_in: Union[UserUpdateSerializer, Dict[str, Any]]
+        self,
+        db: Session,
+        *,
+        db_obj: User,
+        obj_in: Union[UserUpdateSerializer, Dict[str, Any]]
     ) -> User:
         if isinstance(obj_in, dict):
             update_data = obj_in
