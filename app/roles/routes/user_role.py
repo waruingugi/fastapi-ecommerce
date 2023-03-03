@@ -12,7 +12,7 @@ from app.roles.daos.user_role import user_role_dao
 from app.roles.permissions import UserRolePermissions
 from app.core.logger import LoggingRoute
 from app.roles.filters import UserRoleFilter
-from app.filters import FilterDepends
+from fastapi_sqlalchemy_filter import FilterDepends
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -51,5 +51,7 @@ async def read_user_roles(
 # - Modify get
 # - Make sqlalchemy filters work
 # - Delete filters file
-# TSVector
+# - Ordering filter
+# - Hybrid properties
+# - Load only defer
 # Redis

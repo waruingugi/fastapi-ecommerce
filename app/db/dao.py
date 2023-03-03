@@ -24,7 +24,7 @@ from app.exceptions.custom import HttpErrorException, ObjectDoesNotExist
 from app.errors.custom import ErrorCodes
 from http import HTTPStatus
 from app.core.raw_logger import logger
-from app.filters import Filter
+from fastapi_sqlalchemy_filter import Filter
 
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)

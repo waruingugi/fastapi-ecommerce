@@ -25,6 +25,7 @@ pyisemail = "^2.0.1"
 sqlalchemy = "^2.0.3"
 asgi-correlation-id = "^4.1.0"
 black = "^23.1.0"
+fastapi-sqlalchemy-filter = "^0.2.4"
 
 
 [tool.poetry.group.dev.dependencies]
