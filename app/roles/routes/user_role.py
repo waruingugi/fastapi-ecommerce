@@ -31,10 +31,8 @@ async def create_user_role(
 async def read_user_roles(
     user_role_filter: UserRoleFilter = FilterDepends(UserRoleFilter),
     db: Session = Depends(deps.get_db),
-    _: User = Depends(deps.get_current_active_superuser),
-    permissions: deps.Permissions = Depends(
-        deps.Permissions(UserRolePermissions.user_role_list)
-    ),
+    user: User = Depends(deps.get_current_active_superuser),
+    _: deps.Permissions = Depends(deps.Permissions(UserRolePermissions.user_role_list)),
 ):
     """Read user roles"""
     user_role_filter_dict = user_role_filter.dict()

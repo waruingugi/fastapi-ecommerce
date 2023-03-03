@@ -1,4 +1,4 @@
-from app.filters import Filter
+from fastapi_sqlalchemy_filter import Filter
 from typing import Optional
 from app.roles.models import UserRole
 
