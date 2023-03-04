@@ -51,7 +51,7 @@ async def create_business_partner(
     return business_partner_dao.get_or_create(db, obj_in=obj_in)
 
 
-@router.post(
+@router.patch(
     "/business-partner/{busineess_partner_id}",
     response_model=BusinessPartnerInDBSerializer,
 )
