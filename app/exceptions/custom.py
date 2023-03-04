@@ -92,6 +92,18 @@ class InvalidUserScopeType(Exception):
         self.message = message
 
 
+class InvalidBusinessPartnerVerificationState(HttpErrorException):
+    """The specified verfication state was not
+    found in BusinessPartnerVerificationStates"""
+
+    def __init__(self) -> None:
+        super(InvalidBusinessPartnerVerificationState, self).__init__(
+            status_code=HTTPStatus.BAD_REQUEST,
+            error_code=ErrorCodes.INVALID_BP_VERIFICATION_STATE.name,
+            error_message=ErrorCodes.INVALID_BP_VERIFICATION_STATE.value,
+        )
+
+
 class AccessDenied(HttpErrorException):
     def __init__(self) -> None:
         super(AccessDenied, self).__init__(

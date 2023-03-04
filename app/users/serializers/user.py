@@ -1,8 +1,9 @@
 from pydantic import BaseModel, EmailStr, validator
 from app.core.helpers import (
     capitalize_fields,
-    validate_phone_number,
-    validate_email
+    _capitalize_fields,
+    _validate_phone_number,
+    _validate_email,
 )
 from app.db.serializer import InDBBaseSerializer
 from datetime import datetime
@@ -14,19 +15,11 @@ class BusinessPartnerBaseSerializer(BaseModel):
     name: str | None
     email: EmailStr | None
     phone: str
-    is_physical: bool = False
+    is_physical: bool | None = False
 
-    _capitalize_fields = validator("name", pre=True, allow_reuse=True)(
-        capitalize_fields
-    )
-
-    _validate_phone_number = validator("phone", pre=True, allow_reuse=True)(
-        validate_phone_number
-    )
-
-    _validate_email = validator("email", pre=True, allow_reuse=True)(
-        validate_email
-    )
+    _capitalize_fields = _capitalize_fields
+    _validate_phone_number = _validate_phone_number
+    _validate_email = _validate_email
 
 
 class BusinessParnterReadSerializer(BusinessPartnerBaseSerializer, InDBBaseSerializer):
@@ -39,25 +32,20 @@ class UserBaseSerializer(BaseModel):
     phone: str | None
     email: EmailStr | None
 
-    _capitalize_fields = validator("first_name", "last_name", pre=True, allow_reuse=True)(
-        capitalize_fields
-    )
+    _validate_phone_number = _validate_phone_number
+    _validate_email = _validate_email
 
-    _validate_phone_number = validator("phone", pre=True, allow_reuse=True)(
-        validate_phone_number
-    )
-
-    _validate_email = validator("email", pre=True, allow_reuse=True)(
-        validate_email
-    )
+    _capitalize_fields = validator(
+        "first_name", "last_name", pre=True, allow_reuse=True
+    )(capitalize_fields)
 
 
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
     password: str | None
 
-    @validator('password', pre=True, always=True)
-    def set_ts_now(cls, value):
+    @validator("password", pre=True, always=True)
+    def generate_random_password(cls, value):
         return value or generate_uuid()
 
 

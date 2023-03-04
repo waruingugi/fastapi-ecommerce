@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class BusinessTypes(str, Enum):
+class BusinessPartnerTypes(str, Enum):
     RETAILER = "RETAILER"
     INDIVIDUAL = "INDIVIDUAL"
     DISTRIBUTOR = "DISTRIBUTOR"
@@ -9,7 +9,7 @@ class BusinessTypes(str, Enum):
     SHOP = "SHOP"
 
 
-class BusinessVerificationStates(str, Enum):
+class BusinessPartnerVerificationStates(str, Enum):
     PENDING = "PENDING"
     VERIFIED = "VERIFIED"
     REJECTED = "REJECTED"
