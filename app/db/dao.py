@@ -309,6 +309,16 @@ class ReadDao(Generic[ModelType]):
     def search(self: Union[Any, DaoInterface], db: Session, search_filter: Filter):
         query = select(self.model)
 
+        # Remove fiels with None values
+        search_filter_dict = search_filter.dict(exclude_none=True, exclude_unset=True)
+        for key, value in search_filter_dict.items():
+            if (type(value) is dict) and hasattr(search_filter, key):
+                nested_filter = getattr(search_filter, key)
+
+                if type(nested_filter) is Filter:
+                    nested_model = nested_filter.Constants.model
+                    query.outerjoin(nested_model)
+
         query = search_filter.filter(query)
         query = search_filter.sort(query)
 

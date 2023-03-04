@@ -51,5 +51,6 @@ async def read_user_roles(
 # - Delete filters file
 # - Ordering filter
 # - Hybrid properties
+# - business partner state check
 # - Load only defer
 # Redis
