@@ -20,7 +20,3 @@ class InDBBaseSerializer(BaseModel):
                 values["created_at"] if values["created_at"] else datetime.now()
             )
         return updated_at
-
-
-class SearchParam(BaseModel):
-    q: str | None

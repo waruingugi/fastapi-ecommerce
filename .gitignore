@@ -90,3 +90,5 @@ pip-delete-this-directory.txt
 # Flask stuff:
 instance/
 .webassets-cache
+
+# Ignore .vscode custom settings

@@ -20,7 +20,7 @@ class BusinessPartner(Base):
     )
     deleted = Column(Boolean, default=False)
     owner_id = Column(String, ForeignKey("user.id"), nullable=False)
-    owner = relationship("User", back_populates="business_memberships")
+    owner = relationship("User", backref="business_memberships", lazy="joined")
     # accepted_payment_methods:
     # location:
     # country

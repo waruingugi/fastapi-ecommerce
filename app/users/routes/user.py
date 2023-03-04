@@ -1,6 +1,4 @@
-import fastapi
 from fastapi import Depends, APIRouter
-from sqlalchemy.orm import Session
 from app.users.serializers.user import UserInDBSerializer, UserCreateSerializer
 from sqlalchemy.orm import Session
 from app.core.deps import get_db
@@ -9,11 +7,11 @@ from typing import Any, List
 from app.exceptions.custom import HttpErrorException
 from http import HTTPStatus
 from app.errors.custom import ErrorCodes
-from app.db.serializer import SearchParam
 from app.users.filters import UserFilter
 from app.core import deps
 from app.users.models import User
 from app.core.logger import LoggingRoute
+from fastapi_sqlalchemy_filter import FilterDepends
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -26,23 +24,19 @@ async def read_user_me(
     return user_dao.get(db, phone="+254701023045")
 
 
-# @router.get("/users", response_model=List[UserInDBSerializer])
-# async def read_users(
-#     db: Session = Depends(get_db),
-# ) -> Any:
-#     """Get all users"""
-#     return user_dao.get_all(db)
-
-
 @router.get("/users", response_model=List[UserInDBSerializer])
 async def read_users(
-    search: SearchParam = Depends(),
-    filters: UserFilter = Depends(),
+    user_filter: UserFilter = FilterDepends(UserFilter),
     db: Session = Depends(get_db),
-    _: User = Depends(deps.get_current_active_superuser)
+    _: User = Depends(deps.get_current_active_superuser),
 ) -> Any:
     """Get all users"""
-    return user_dao.get_all(db)
+    user_filter_dict = user_filter.dict()
+
+    if not any(user_filter_dict.values()):  # Returns True if all values are falsy/None
+        return user_dao.get_all(db)
+
+    return user_dao.search(db, user_filter)
 
 
 @router.post("/register/user", response_model=UserInDBSerializer)

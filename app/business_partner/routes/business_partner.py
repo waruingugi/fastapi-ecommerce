@@ -4,6 +4,7 @@ from app.business_partner.serializers.business_partner import (
     BusinessPartnerInDBSerializer,
     BusinessPartnerCreateSerializer,
     BusinessPartnerCreateExistingOwnerSerializer,
+    BusinessPartnerUpdateSerializer,
 )
 from typing import Any
 from sqlalchemy.orm import Session
@@ -48,3 +49,25 @@ async def create_business_partner(
     )
 
     return business_partner_dao.get_or_create(db, obj_in=obj_in)
+
+
+@router.patch(
+    "/business-partner/{busineess_partner_id}",
+    response_model=BusinessPartnerInDBSerializer,
+)
+async def update_business_partner(
+    business_partner_id: str,
+    bp_in: BusinessPartnerUpdateSerializer,
+    db: Session = Depends(get_db),
+) -> Any:
+    """Update business partner"""
+
+    # Check whether the business owner exists
+    user_dao.get_not_none(db, id=bp_in.owner_id)
+
+    # Get the business_partner to be updated
+    db_obj = business_partner_dao.get(db, id=business_partner_id)
+
+    return business_partner_dao.update(
+        db, db_obj=db_obj, obj_in=bp_in.dict(exclude_none=True, exclude_unset=True)
+    )

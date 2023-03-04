@@ -282,7 +282,7 @@ class ReadDao(Generic[ModelType]):
     def get_not_none(self, db: Session, **filters) -> ModelType:
         obj = self.get(db, **filters)
         if not obj:
-            raise ObjectDoesNotExist(f"Object with filters {filters} not found")
+            raise ObjectDoesNotExist
         return obj
 
     def get_all(
@@ -308,6 +308,18 @@ class ReadDao(Generic[ModelType]):
 
     def search(self: Union[Any, DaoInterface], db: Session, search_filter: Filter):
         query = select(self.model)
+
+        # Remove fields with None values
+        search_filter_dict = search_filter.dict(exclude_none=True, exclude_unset=True)
+
+        for key, value in search_filter_dict.items():
+            if (type(value) is dict) and hasattr(search_filter, key):
+                nested_filter = getattr(search_filter, key)
+                # Get nested model...
+                if isinstance(nested_filter, Filter):
+                    # Then join the model to the query
+                    nested_model = nested_filter.Constants.model
+                    query = query.join(nested_model, isouter=True)
 
         query = search_filter.filter(query)
         query = search_filter.sort(query)
