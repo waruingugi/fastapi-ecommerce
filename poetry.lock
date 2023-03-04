@@ -445,14 +445,14 @@ test = ["anyio[trio] (>=3.2.1,<4.0.0)", "black (==22.10.0)", "coverage[toml] (>=
 
 [[package]]
 name = "fastapi-sqlalchemy-filter"
-version = "0.2.4"
+version = "0.2.5"
 description = "A lite version of fastapi-filter for SQLAlchemy only"
 category = "main"
 optional = false
 python-versions = "*"
 files = [
-    {file = "fastapi_sqlalchemy_filter-0.2.4-py3-none-any.whl", hash = "sha256:d0003d7287c6d9a04e50d9b686236a3de5a2a529a9919bb16263054ab45ef1f9"},
-    {file = "fastapi_sqlalchemy_filter-0.2.4.tar.gz", hash = "sha256:c38524daef7299be93ca5c85137662594a2a8158b81faa583c2ecf171f871b1e"},
+    {file = "fastapi_sqlalchemy_filter-0.2.5-py3-none-any.whl", hash = "sha256:deff1903d79f5493fbde569568181412b04f1a997befa20b4d2940b44f72f4de"},
+    {file = "fastapi_sqlalchemy_filter-0.2.5.tar.gz", hash = "sha256:49250b9a317d0b9741a48c710e3288920c5669068a84dbfb0800d7fe95350679"},
 ]
 
 [package.dependencies]
@@ -1380,4 +1380,4 @@ test = ["covdefaults (>=2.2.2)", "coverage (>=7.1)", "coverage-enable-subprocess
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "4422742cccbc29073209762ee0ab8ff40e6bcac5b59b68f0f4da1d67d82ff1f4"
+content-hash = "512241d7d65fe9a53473cc2f414debbd61e9cc1d8475db3bf4f679d338bda30a"
