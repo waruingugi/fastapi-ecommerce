@@ -1,14 +1,17 @@
 from sqlalchemy import Column, ForeignKey, String, Boolean
 from sqlalchemy.orm import Mapped, relationship
 from app.db.base_class import Base
-from app.business_partner.constants import BusinessTypes, BusinessVerificationStates
+from app.business_partner.constants import (
+    BusinessPartnerTypes,
+    BusinessPartnerVerificationStates,
+)
 
 
 class BusinessPartner(Base):
     name: str = Column(String, nullable=False)
     business_type: str = Column(
         String,
-        default=BusinessTypes.SHOP.value,
+        default=BusinessPartnerTypes.SHOP.value,
     )
     email: str = Column(String, nullable=True)
     phone: Mapped[str] = Column(String, unique=True, nullable=False, index=True)
@@ -16,7 +19,7 @@ class BusinessPartner(Base):
     is_physical = Column(Boolean, default=False)
     verification_state = Column(
         String,
-        default=BusinessVerificationStates.PENDING.value,
+        default=BusinessPartnerVerificationStates.PENDING.value,
     )
     deleted = Column(Boolean, default=False)
     owner_id = Column(String, ForeignKey("user.id"), nullable=False)

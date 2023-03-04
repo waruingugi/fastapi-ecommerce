@@ -52,5 +52,6 @@ async def read_user_roles(
 # - Ordering filter
 # - Hybrid properties
 # - business partner state check
+# - if user create business, change to owner
 # - Load only defer
 # Redis
