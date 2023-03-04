@@ -6,7 +6,9 @@ class ErrorCodes(str, Enum):
     INVALID_EMAIL = "The email {} is not valid. Please try another"
     NO_CHANGES_DETECTED = "No changes were detected"
     USERNAME_ALREADY_EXISTS = "A user with this username already exists in the system"
-    BUSINESS_OWNER_DOES_NOT_EXIST = "The owner of this business does not exist. Did you create the owner?"
+    BUSINESS_OWNER_DOES_NOT_EXIST = (
+        "The owner of this business does not exist. Did you create the owner?"
+    )
     INCORRECT_USERNAME_OR_PASSWORD = "Incorrect username or password"
     USERS_PRIVILEGES_NOT_ENOUGH = "This user doesn't have enough privileges"
     INACTIVE_ACCOUNT = "This account is currently inactive"
@@ -14,4 +16,5 @@ class ErrorCodes(str, Enum):
     EXPIRED_AUTHORIZATION_TOKEN = "The authorization token expired"
     INVALID_TOKEN = "Could not validate your token"
     USER_NOT_FOUND = "This user does not exist in the system"
+    OBJECT_NOT_FOUND = "The specified object does not exist"
     ACCESS_DENIED = "You are not permitted to perform this action"

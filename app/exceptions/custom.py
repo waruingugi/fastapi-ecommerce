@@ -25,7 +25,7 @@ class InsufficientUserPrivileges(HttpErrorException):
         super(InsufficientUserPrivileges, self).__init__(
             status_code=HTTPStatus.BAD_REQUEST,
             error_code=ErrorCodes.USERS_PRIVILEGES_NOT_ENOUGH.name,
-            error_message=ErrorCodes.USERS_PRIVILEGES_NOT_ENOUGH.value
+            error_message=ErrorCodes.USERS_PRIVILEGES_NOT_ENOUGH.value,
         )
 
 
@@ -34,7 +34,7 @@ class InactiveAccount(HttpErrorException):
         super(InactiveAccount, self).__init__(
             status_code=HTTPStatus.UNAUTHORIZED,
             error_code=ErrorCodes.INACTIVE_ACCOUNT.name,
-            error_message=ErrorCodes.INACTIVE_ACCOUNT.value
+            error_message=ErrorCodes.INACTIVE_ACCOUNT.value,
         )
 
 
@@ -74,14 +74,20 @@ class UserDoesNotExist(HttpErrorException):
         )
 
 
-class ObjectDoesNotExist(Exception):
+class ObjectDoesNotExist(HttpErrorException):
     """The specified object was not found"""
-    def __init__(self, message: str) -> None:
-        self.message = message
+
+    def __init__(self) -> None:
+        super(ObjectDoesNotExist, self).__init__(
+            status_code=HTTPStatus.NOT_FOUND,
+            error_code=ErrorCodes.OBJECT_NOT_FOUND.name,
+            error_message=ErrorCodes.OBJECT_NOT_FOUND.value,
+        )
 
 
 class InvalidUserScopeType(Exception):
     """The specified scope was not found in ´UserScopeTypes´"""
+
     def __init__(self, message: str) -> None:
         self.message = message
 

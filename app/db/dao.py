@@ -282,7 +282,7 @@ class ReadDao(Generic[ModelType]):
     def get_not_none(self, db: Session, **filters) -> ModelType:
         obj = self.get(db, **filters)
         if not obj:
-            raise ObjectDoesNotExist(f"Object with filters {filters} not found")
+            raise ObjectDoesNotExist
         return obj
 
     def get_all(
