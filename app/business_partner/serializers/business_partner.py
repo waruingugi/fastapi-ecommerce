@@ -1,22 +1,15 @@
 from app.business_partner.constants import BusinessPartnerTypes
 from app.db.serializer import InDBBaseSerializer
 from app.users.serializers.user import (
-    UserCreateSerializer,
     UserReadSerializer,
     BusinessPartnerBaseSerializer,
 )
 from app.core.helpers import _validate_bp_verification_state
 
 
-class BusinessPartnerCreateSerializer(BusinessPartnerBaseSerializer):
-    name: str
-    business_type: str = BusinessPartnerTypes.SHOP.value
-    owner: UserCreateSerializer
-
-
 class BusinessPartnerCreateExistingOwnerSerializer(BusinessPartnerBaseSerializer):
     name: str
-    business_type: str = BusinessPartnerTypes.SHOP.value
+    business_type: str | None = BusinessPartnerTypes.SHOP.value
     owner_id: str
 
 
@@ -29,6 +22,7 @@ class BusinessPartnerUpdateSerializer(BusinessPartnerBaseSerializer):
 
 
 class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSerializer):
+    business_type: str
     is_verified: str
     is_physical: bool
     verification_state: str
