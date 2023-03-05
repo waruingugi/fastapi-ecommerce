@@ -54,4 +54,6 @@ async def read_user_roles(
 # - business partner state check
 # - if user create business, change to owner
 # - Load only defer
+# - Scope
+# - Celery
 # Redis

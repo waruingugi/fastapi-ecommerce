@@ -6,7 +6,6 @@ from typing import List
 
 class UserBaseFilter(Filter):
     contact: str | None
-    order_by: List[str] | None
 
     class Constants(Filter.Constants):
         model = User
@@ -17,3 +16,4 @@ class UserBaseFilter(Filter):
 class UserFilter(UserBaseFilter, Filter):
     is_active: bool | None
     user_type: UserTypes | None
+    order_by: List[str] | None
