@@ -2,11 +2,11 @@ from fastapi_sqlalchemy_filter import Filter, FilterDepends, with_prefix
 from app.business_partner.models import BusinessPartner
 from app.users.filters import UserBaseFilter
 from typing import List
+from pydantic import Field
 
 
 class BusinessPartnerBaseFilter(Filter):
     contact: str | None
-    order_by: List[str] | None
 
     class Constants(Filter.Constants):
         model = BusinessPartner
@@ -15,6 +15,7 @@ class BusinessPartnerBaseFilter(Filter):
 
 
 class BusinessPartnerFilter(BusinessPartnerBaseFilter, Filter):
-    name: str | None
+    name__ilike: str | None = Field(alias="name")
     is_verified: bool | None
     owner: UserBaseFilter | None = FilterDepends(with_prefix("owner", UserBaseFilter))
+    order_by: List[str] | None
