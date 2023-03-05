@@ -2,7 +2,6 @@ from fastapi import Depends, APIRouter
 from app.core.deps import get_db
 from app.business_partner.serializers.business_partner import (
     BusinessPartnerInDBSerializer,
-    BusinessPartnerCreateSerializer,
     BusinessPartnerCreateExistingOwnerSerializer,
     BusinessPartnerUpdateSerializer,
 )
@@ -16,6 +15,7 @@ from app.users.models import User
 from app.core.logger import LoggingRoute
 from app.business_partner.filters import BusinessPartnerFilter
 from fastapi_sqlalchemy_filter import FilterDepends
+from app.users.constants import UserTypes
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -36,19 +36,18 @@ async def read_business_partners(
 
 @router.post("/business-partner", response_model=BusinessPartnerInDBSerializer)
 async def create_business_partner(
-    business_data: BusinessPartnerCreateSerializer, db: Session = Depends(get_db)
+    bp_in: BusinessPartnerCreateExistingOwnerSerializer, db: Session = Depends(get_db)
 ) -> Any:
     """Create business partner"""
-    business_data_dict = business_data.dict(exclude_unset=True)
+    owner = user_dao.get_not_none(
+        db, id=bp_in.owner_id
+    )  # Assert that the bp owner exists
+    new_bp = business_partner_dao.get_or_create(db, obj_in=bp_in)
 
-    """Check whether the business owner exists"""
-    user_in = user_dao.get_or_create(db, obj_in=business_data.owner)
-
-    obj_in = BusinessPartnerCreateExistingOwnerSerializer(
-        owner_id=user_in.id, **business_data_dict
-    )
-
-    return business_partner_dao.get_or_create(db, obj_in=obj_in)
+    user_dao.update(
+        db, db_obj=owner, obj_in={"user_type": UserTypes.BUSINESS_OWNER.value}
+    )  # Update user to BUSINESS_OWNER type
+    return new_bp
 
 
 @router.patch(

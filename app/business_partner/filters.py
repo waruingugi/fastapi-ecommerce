@@ -1,10 +1,12 @@
 from fastapi_sqlalchemy_filter import Filter, FilterDepends, with_prefix
 from app.business_partner.models import BusinessPartner
 from app.users.filters import UserBaseFilter
+from typing import List
 
 
 class BusinessPartnerBaseFilter(Filter):
     contact: str | None
+    order_by: List[str] | None
 
     class Constants(Filter.Constants):
         model = BusinessPartner
