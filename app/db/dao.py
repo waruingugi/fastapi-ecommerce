@@ -16,7 +16,6 @@ from sqlalchemy.orm import Session, Load
 from sqlalchemy import insert, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import get_hybrid_properties
-from sqlalchemy.future import select
 
 from datetime import datetime
 
@@ -296,20 +295,16 @@ class ReadDao(Generic[ModelType]):
         load_options: Optional[Sequence[LoadOption]] = None,
         **filters,
     ) -> List[ModelType]:
-        query = select(self.model)
+        query = db.query(self.model)
 
         query = _create_filtered_query(query, filters)
         if load_options:
             query = query.options(*load_options)
 
-        return db.scalars(query).all()
+        return query.all()
 
     def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
-        query = select(self.model)
-        return db.scalars(query.where(self.model.id.in_(ids))).all()
-
-    def exists(self, db: Session, id: str) -> bool:
-        return db.scalars(select(self.model.id).filter_by(id=id)).first()
+        return db.query(self.model).filter(self.model.id.in_(ids)).all()
 
     def get(
         self: Union[Any, DaoInterface],
@@ -317,16 +312,23 @@ class ReadDao(Generic[ModelType]):
         load_options: Optional[Sequence[LoadOption]] = None,
         **filters,
     ) -> Optional[ModelType]:
-
         query = db.query(self.model)
+        query = _create_filtered_query(query, filters)
 
         if load_options:
             query = query.options(*load_options)
         return query.filter_by(**filters).first()
 
-    def search(self: Union[Any, DaoInterface], db: Session, search_filter: Filter):
-        query = select(self.model)
+    def search(
+        self: Union[Any, DaoInterface],
+        db: Session,
+        search_filter: Filter,
+        load_options: Optional[Sequence[LoadOption]] = None,
+    ):
+        query = db.query(self.model)
         query = _create_filtered_query(query, search_filter)
+        if load_options:
+            query = query.options(*load_options)
 
         return db.scalars(query).all()
 
