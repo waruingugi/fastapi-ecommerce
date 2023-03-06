@@ -10,23 +10,21 @@ from fastapi.security import (
 from jose import JWTError, jwt
 from pydantic import BaseModel, ValidationError
 from app.users.daos.user import user_dao
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 from app.core.config import settings
 from app.exceptions.custom import (
     InsufficientUserPrivileges,
     InactiveAccount,
-    ExpiredRefreshToken,
     ExpiredAccessToken,
     IncorrectCredentials,
     InvalidToken,
-    AccessDenied
+    AccessDenied,
 )
 from app.users.models import User
-from app.auth.utils.token import (
-    check_refresh_token_is_valid,
-    check_access_token_is_valid
-)
+from app.auth.utils.token import check_access_token_is_valid
+from app.roles.models import UserRole
 from app.roles.daos.user_role import user_role_dao
+
 
 class TokenData(BaseModel):
     username: str | None = None
@@ -46,7 +44,7 @@ def get_db() -> Generator:
 
 async def get_async_db() -> AsyncGenerator:
     async with AsyncSessionLocal() as db:
-        yield db 
+        yield db
 
 
 async def get_decoded_token(
@@ -62,9 +60,9 @@ async def get_decoded_token(
                 token,
                 settings.SECRET_KEY,
                 algorithms=[settings.ALGORITHM],
-                options={"verify_exp": True}
+                options={"verify_exp": True},
             )
-            
+
             # ´x-user-id´ response header is used in logging
             response.headers["x-user-id"] = payload["user_id"]
             return payload
@@ -92,7 +90,7 @@ async def get_current_user(
 
 
 async def get_current_active_user(
-    current_user: User = Security(get_current_user)
+    current_user: User = Security(get_current_user),
 ) -> User:
     if not current_user.is_active:
         raise InactiveAccount
@@ -100,7 +98,7 @@ async def get_current_active_user(
 
 
 async def get_current_active_superuser(
-    current_user: User = Security(get_current_user)
+    current_user: User = Security(get_current_user),
 ) -> User:
     if not user_dao.is_superuser(current_user):
         raise InsufficientUserPrivileges
@@ -114,9 +112,13 @@ class Permissions:
     async def __call__(
         self,
         db: Session = Depends(get_db),
-        token_payload: dict = Depends(get_decoded_token)
+        token_payload: dict = Depends(get_decoded_token),
     ):
-        role = user_role_dao.get(db, user_id=token_payload["user_id"])
+        role = user_role_dao.get(
+            db,
+            user_id=token_payload["user_id"],
+            load_options=[load_only(UserRole._permissions)],
+        )
 
         required_perms = [perm.value for perm in self.perms]
 

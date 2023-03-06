@@ -9,9 +9,10 @@ from typing import (
     Union,
     Protocol,
     TypedDict,
+    Sequence,
 )
 from pydantic import BaseModel
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Load
 from sqlalchemy import insert, inspect, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy_utils import get_hybrid_properties
@@ -25,10 +26,14 @@ from app.errors.custom import ErrorCodes
 from http import HTTPStatus
 from app.core.raw_logger import logger
 from fastapi_sqlalchemy_filter import Filter
+from sqlalchemy.orm.strategy_options import _AbstractLoad
+from app.db.filters import _create_filtered_query
 
+# Custom Types
 ModelType = TypeVar("ModelType", bound=Base)
 CreateSerializer = TypeVar("CreateSerializer", bound=BaseModel)
 UpdateSerializer = TypeVar("UpdateSerializer", bound=BaseModel)
+LoadOption = Union[_AbstractLoad, Load]
 
 
 # Class that we can use to keep track of the changes in an object
@@ -288,8 +293,15 @@ class ReadDao(Generic[ModelType]):
     def get_all(
         self,
         db: Session,
+        load_options: Optional[Sequence[LoadOption]] = None,
+        **filters,
     ) -> List[ModelType]:
         query = select(self.model)
+
+        query = _create_filtered_query(query, filters)
+        if load_options:
+            query = query.options(*load_options)
+
         return db.scalars(query).all()
 
     def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
@@ -300,29 +312,21 @@ class ReadDao(Generic[ModelType]):
         return db.scalars(select(self.model.id).filter_by(id=id)).first()
 
     def get(
-        self: Union[Any, DaoInterface], db: Session, **filters
+        self: Union[Any, DaoInterface],
+        db: Session,
+        load_options: Optional[Sequence[LoadOption]] = None,
+        **filters,
     ) -> Optional[ModelType]:
 
         query = db.query(self.model)
+
+        if load_options:
+            query = query.options(*load_options)
         return query.filter_by(**filters).first()
 
     def search(self: Union[Any, DaoInterface], db: Session, search_filter: Filter):
         query = select(self.model)
-
-        # Remove fields with None values
-        search_filter_dict = search_filter.dict(exclude_none=True, exclude_unset=True)
-
-        for key, value in search_filter_dict.items():
-            if (type(value) is dict) and hasattr(search_filter, key):
-                nested_filter = getattr(search_filter, key)
-                # Get nested model...
-                if isinstance(nested_filter, Filter):
-                    # Then join the model to the query
-                    nested_model = nested_filter.Constants.model
-                    query = query.join(nested_model, isouter=True)
-
-        query = search_filter.filter(query)
-        query = search_filter.sort(query)
+        query = _create_filtered_query(query, search_filter)
 
         return db.scalars(query).all()
 
