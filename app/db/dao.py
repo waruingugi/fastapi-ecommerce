@@ -323,12 +323,9 @@ class ReadDao(Generic[ModelType]):
         self: Union[Any, DaoInterface],
         db: Session,
         search_filter: Filter,
-        load_options: Optional[Sequence[LoadOption]] = None,
     ):
         query = db.query(self.model)
         query = _create_filtered_query(query, search_filter)
-        if load_options:
-            query = query.options(*load_options)
 
         return db.scalars(query).all()
 
