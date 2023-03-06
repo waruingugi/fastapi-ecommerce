@@ -1,12 +1,9 @@
-from typing import Generator, AsyncGenerator, List
+from typing import Generator, AsyncGenerator
 
 from app.db.session import SessionLocal, AsyncSessionLocal
 from app.db.permissions import BasePermission
 from fastapi import Depends, Response, Security
-from fastapi.security import (
-    OAuth2PasswordBearer,
-    SecurityScopes,
-)
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from pydantic import BaseModel, ValidationError
 from app.users.daos.user import user_dao
@@ -28,12 +25,10 @@ from app.roles.daos.user_role import user_role_dao
 
 class TokenData(BaseModel):
     username: str | None = None
-    scopes: List[str] = []
 
 
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl=f"{settings.API_V1_STR}/auth/access-token",
-    scopes={"me": "Read information about the current user.", "items": "Read items."},
 )
 
 
@@ -73,18 +68,17 @@ async def get_decoded_token(
 
 
 async def get_current_user(
-    security_scopes: SecurityScopes,
     db: Session = Depends(get_db),
     token_payload: dict = Depends(get_decoded_token),
 ) -> User:
-    user = user_dao.get(db, id=token_payload["user_id"])
+    user = user_dao.get(
+        db,
+        id=token_payload["user_id"],
+        load_options=[load_only(User.id)],
+    )
 
     if user is None:
         raise IncorrectCredentials
-
-    for scope in security_scopes.scopes:
-        if scope not in token_payload["scopes"]:
-            raise InsufficientUserPrivileges
 
     return user
 
