@@ -1,25 +1,14 @@
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
 from app.core.config import settings
-from jose import jwt
-from fastapi.security import (
-    OAuth2PasswordBearer,
-    SecurityScopes,
-)
-from fastapi import Depends, FastAPI, HTTPException, Security, status
+
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
 from app.auth.daos.token import token_dao
 from app.auth.models import AuthToken
-from app.auth.serializers.token import (
-    TokenGrantType,
-    TokenCreateSerializer
-)
-from app.auth.utils.token import (
-    check_refresh_token_is_valid,
-    check_access_token_is_valid
-)
+from app.auth.serializers.token import TokenGrantType, TokenCreateSerializer
+from app.auth.utils.token import check_refresh_token_is_valid
 from app.auth.serializers.token import TokenReadSerializer
 from app.exceptions.custom import ExpiredRefreshToken, InvalidToken
 from pydantic import ValidationError
@@ -39,9 +28,7 @@ def get_password_hash(password: str):
 def get_access_token(db: Session, *, user_id: str) -> AuthToken:
     """Creates access token and saves it to ´AuthToken´ model"""
     token_data = create_access_token(
-        db=db,
-        subject=user_id,
-        grant_type=TokenGrantType.CLIENT_CREDENTIALS.value
+        db=db, subject=user_id, grant_type=TokenGrantType.CLIENT_CREDENTIALS.value
     )
 
     obj_in = TokenCreateSerializer(
@@ -49,16 +36,19 @@ def get_access_token(db: Session, *, user_id: str) -> AuthToken:
         token_type=TokenGrantType.CLIENT_CREDENTIALS,
         access_token=token_data["access_token"],
         refresh_token=token_data["refresh_token"],
-        refresh_token_eat=datetime.utcnow() + timedelta(seconds=token_data["refresh_ein"]),
-        access_token_eat=datetime.utcnow() + timedelta(seconds=token_data["access_token_ein"]),
-        is_active=True
+        refresh_token_eat=datetime.utcnow()
+        + timedelta(seconds=token_data["refresh_ein"]),
+        access_token_eat=datetime.utcnow()
+        + timedelta(seconds=token_data["access_token_ein"]),
+        is_active=True,
     )
 
     return token_dao.create(db, obj_in=obj_in)
 
 
 def get_decoded_refresh_token(
-    db: Session, token: str,
+    db: Session,
+    token: str,
 ) -> dict:
     """Decode the token"""
     if check_refresh_token_is_valid(db, refresh_token=token):
@@ -67,9 +57,9 @@ def get_decoded_refresh_token(
                 token,
                 settings.SECRET_KEY,
                 algorithms=[settings.ALGORITHM],
-                options={"verify_exp": True}
+                options={"verify_exp": True},
             )
- 
+
             return payload
         except (JWTError, ValidationError):
             raise InvalidToken
@@ -77,9 +67,7 @@ def get_decoded_refresh_token(
         raise ExpiredRefreshToken
 
 
-def renew_access_token(
-    db: Session, *, token: str
-):
+def renew_access_token(db: Session, *, token: str):
     """Generate new access token if refresh token is valid."""
     token_payload = get_decoded_refresh_token(db, token)
     token = get_access_token(db, user_id=token_payload["user_id"])
@@ -94,19 +82,16 @@ def renew_access_token(
     return TokenReadSerializer(**token_dict)
 
 
-
-def create_access_token(
-    db: Session, subject: str, grant_type: str
-) -> dict:
+def create_access_token(db: Session, subject: str, grant_type: str) -> dict:
     "Create access token and refresh token"
-    access_token_ein =  settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
+    access_token_ein = settings.ACCESS_TOKEN_EXPIRY_IN_SECONDS
     refresh_ein = settings.REFRESH_TOKEN_EXPIRY_IN_SECONDS
 
     to_encode = {
         "iat": int(datetime.utcnow().timestamp()),
         "exp": datetime.utcnow() + timedelta(seconds=access_token_ein),
         "user_id": str(subject),
-        "grant_type": grant_type
+        "grant_type": grant_type,
     }
 
     # Create access token
@@ -115,7 +100,9 @@ def create_access_token(
     to_encode["exp"] = datetime.utcnow() + timedelta(seconds=refresh_ein)
     to_encode["iat"] = int(datetime.utcnow().timestamp())
 
-    refresh_token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+    refresh_token = jwt.encode(
+        to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM
+    )
 
     token_data = {
         "access_token": token,
