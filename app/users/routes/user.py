@@ -38,7 +38,6 @@ async def read_users(
     if not any(user_filter_dict.values()):  # Returns True if all values are falsy/None
         return user_dao.get_all(db)
 
-    # return user_dao.search(db, user_filter, params)
     return user_dao.get_multi_paginated(db, user_filter, params)
 
 
