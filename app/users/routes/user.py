@@ -12,6 +12,7 @@ from app.core import deps
 from app.users.models import User
 from app.core.logger import LoggingRoute
 from fastapi_sqlalchemy_filter import FilterDepends
+from fastapi_pagination import Params
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -26,6 +27,7 @@ async def read_user_me(
 
 @router.get("/users", response_model=List[UserInDBSerializer])
 async def read_users(
+    params: Params = Depends(),
     user_filter: UserFilter = FilterDepends(UserFilter),
     db: Session = Depends(get_db),
     _: User = Depends(deps.get_current_active_superuser),
@@ -36,7 +38,8 @@ async def read_users(
     if not any(user_filter_dict.values()):  # Returns True if all values are falsy/None
         return user_dao.get_all(db)
 
-    return user_dao.search(db, user_filter)
+    # return user_dao.search(db, user_filter, params)
+    return user_dao.get_multi_paginated(db, user_filter, params)
 
 
 @router.post("/register/user", response_model=UserInDBSerializer)
