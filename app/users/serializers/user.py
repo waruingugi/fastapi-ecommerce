@@ -61,6 +61,7 @@ class UserUpdateSerializer(UserBaseSerializer):
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
     user_type: str
     date_joined: datetime
+    is_active: bool
     business_memberships: Optional[List[BusinessParnterReadSerializer]]
 
 

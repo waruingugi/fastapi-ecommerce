@@ -10,6 +10,7 @@ from typing import (
     Protocol,
     TypedDict,
     Sequence,
+    cast,
 )
 from pydantic import BaseModel
 from sqlalchemy.orm import Session, Load
@@ -27,6 +28,11 @@ from app.core.raw_logger import logger
 from fastapi_sqlalchemy_filter import Filter
 from sqlalchemy.orm.strategy_options import _AbstractLoad
 from app.db.filters import _create_filtered_query
+from fastapi_pagination.ext.sqlalchemy import paginate_query
+from fastapi_pagination import Params
+from sqlalchemy.sql import Select
+from sqlalchemy.engine import Row
+
 
 # Custom Types
 ModelType = TypeVar("ModelType", bound=Base)
@@ -301,7 +307,7 @@ class ReadDao(Generic[ModelType]):
         if load_options:
             query = query.options(*load_options)
 
-        return query.all()
+        return query.all()  # type: ignore
 
     def get_by_ids(self, db: Session, *, ids: List[str]) -> List[ModelType]:
         return db.query(self.model).filter(self.model.id.in_(ids)).all()
@@ -317,15 +323,28 @@ class ReadDao(Generic[ModelType]):
 
         if load_options:
             query = query.options(*load_options)
-        return query.filter_by(**filters).first()
+        return query.filter_by(**filters).first()  # type: ignore
 
     def search(
         self: Union[Any, DaoInterface],
         db: Session,
         search_filter: Filter,
-    ):
+    ) -> Optional[ModelType]:
         query = db.query(self.model)
         query = _create_filtered_query(query, search_filter)
+
+        return db.scalars(query).all()
+
+    def get_multi_paginated(
+        self: Union[Any, DaoInterface],
+        db: Session,
+        search_filter: Filter,
+        params: Params,
+    ) -> Sequence[Row]:
+        query = db.query(self.model)
+        query = _create_filtered_query(query, search_filter)
+        query = cast(Select, query)
+        query = paginate_query(query, params)
 
         return db.scalars(query).all()
 
