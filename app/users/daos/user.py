@@ -82,6 +82,9 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         else:
             update_data = obj_in.dict(exclude_unset=True)
 
+        if update_data.get("password", None):
+            update_data["hashed_password"] = get_password_hash(update_data["password"])
+
         return super().update(db, db_obj=db_obj, obj_in=update_data)
 
     def is_superuser(self, user: User) -> bool:

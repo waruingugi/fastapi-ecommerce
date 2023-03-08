@@ -49,12 +49,9 @@ class UserCreateSerializer(UserBaseSerializer):
         return value or generate_uuid()
 
 
-class UserActivateDeactivateSerializer(BaseModel):
-    is_active: bool
-
-
 class UserUpdateSerializer(UserBaseSerializer):
     user_type: str | None
+    is_active: bool | None
     password: str | None
 
 

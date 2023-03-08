@@ -74,6 +74,15 @@ class UserDoesNotExist(HttpErrorException):
         )
 
 
+class UserAlreadyExists(HttpErrorException):
+    def __init__(self) -> None:
+        super(UserAlreadyExists, self).__init__(
+            status_code=HTTPStatus.BAD_REQUEST,
+            error_code=ErrorCodes.USERNAME_ALREADY_EXISTS.name,
+            error_message=ErrorCodes.USERNAME_ALREADY_EXISTS.value,
+        )
+
+
 class ObjectDoesNotExist(HttpErrorException):
     """The specified object was not found"""
 
