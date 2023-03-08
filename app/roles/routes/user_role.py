@@ -45,14 +45,6 @@ async def read_user_roles(
 
 
 # Search query
-# - Modify get
-# - Make sqlalchemy filters work
-# - Delete filters file
-# - Ordering filter
-# - Hybrid properties
-# - business partner state check
-# - if user create business, change to owner
-# - Load only defer
-# - Scope
+# - Scope, create model country
 # - Celery
 # Redis

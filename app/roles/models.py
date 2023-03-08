@@ -5,14 +5,14 @@ from sqlalchemy import (
     String,
     Text,
 )
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, mapped_column
 from typing import List
 
 
 class UserRole(Base):
     name = Column(String, nullable=False)
     _permissions = Column("permissions", Text())
-    scope = Column(String, nullable=True)
+    scope = mapped_column(String, nullable=True)
     user_id = Column(String, ForeignKey("user.id", ondelete="CASCADE"), unique=True)
 
     user = relationship("User", uselist=False)
@@ -32,7 +32,7 @@ class Role(Base):
 
 class UserRole(Base):
     user_id = Column(String, ForeignKey("user.id", ondelete='CASCADE'), unique=True)
-    role_id = Column(String, ForeignKey("role.id", ondelete='PROTECT'), unique=True)
+    role_id = Column(String, ForeignKey("role.id", ondelete='PROTECT'), nullable=False)
 
     user = relationship("User", uselist=False)
 
