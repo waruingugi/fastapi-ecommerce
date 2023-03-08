@@ -1,4 +1,4 @@
-from app.core import deps
+from app.core.deps import get_db, Permissions, get_current_active_superuser
 from fastapi import APIRouter
 from fastapi import Depends
 from sqlalchemy.orm import Session
@@ -20,8 +20,8 @@ router = APIRouter(route_class=LoggingRoute)
 @router.post("/", response_model=UserRoleInDBSerializer)
 async def create_user_role(
     role_in: UserRoleUpdateSerializer,
-    db: Session = Depends(deps.get_db),
-    _: User = Depends(deps.get_current_active_superuser),
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_active_superuser),
 ):
     """Create user role"""
     return user_role_dao.get_or_create(db, obj_in=role_in)
@@ -30,9 +30,8 @@ async def create_user_role(
 @router.get("/roles", response_model=List[UserRoleInDBSerializer])
 async def read_user_roles(
     user_role_filter: UserRoleFilter = FilterDepends(UserRoleFilter),
-    db: Session = Depends(deps.get_db),
-    user: User = Depends(deps.get_current_active_superuser),
-    _: deps.Permissions = Depends(deps.Permissions(UserRolePermissions.user_role_list)),
+    db: Session = Depends(get_db),
+    _: Permissions = Depends(Permissions(UserRolePermissions.user_role_list)),
 ):
     """Read user roles"""
     user_role_filter_dict = user_role_filter.dict()
