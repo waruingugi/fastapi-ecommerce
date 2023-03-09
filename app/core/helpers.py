@@ -1,5 +1,5 @@
 from pydantic import validator
-from typing import Optional
+from typing import Optional, List
 from phonenumbers import parse as parse_phone_number
 from phonenumbers import (
     NumberParseException,
@@ -85,3 +85,8 @@ def valid_bp_verification_state(cls, value):
 _validate_bp_verification_state = validator(
     "verification_state", pre=True, allow_reuse=True
 )(valid_bp_verification_state)
+
+
+def convert_perms_list_to_string(perms_list: List[str]) -> str:
+    """Convert permissions list to string"""
+    return ", ".join(map(str, set(perms_list))) if perms_list else ""
