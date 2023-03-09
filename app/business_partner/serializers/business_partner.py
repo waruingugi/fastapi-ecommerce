@@ -26,4 +26,4 @@ class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSeria
     is_verified: str
     is_physical: bool
     verification_state: str
-    owner: UserReadSerializer | None  # Remove None
+    owner: UserReadSerializer
