@@ -1,34 +1,21 @@
 from app.db.serializer import InDBBaseSerializer
-from pydantic import BaseModel, validator
-from typing import List
-from app.roles.constants import UserScopeTypes
-from app.exceptions.custom import InvalidUserScopeType
+from pydantic import BaseModel
 from app.users.serializers.user import UserReadSerializer
 
 
 class UserRoleBaseSerializer(BaseModel):
-    name: str
-    scope: str | None
-
-    @validator('scope', pre=True)
-    def is_valid_scope(cls, value) -> str | InvalidUserScopeType:
-        """Validate scope is a valid UserScopeTypes object"""
-        for scope in UserScopeTypes:
-            if scope.value == value:
-                return value
-
-        return InvalidUserScopeType(f"{value} scope does not exist")
+    user_id: str
+    role_id: str
 
 
 class UserRoleInDBSerializer(InDBBaseSerializer, UserRoleBaseSerializer):
-    user_id: str
     user: UserReadSerializer
 
 
 class UserRoleCreateSerializer(UserRoleBaseSerializer):
-    user_id: str
+    ...
 
 
 class UserRoleUpdateSerializer(UserRoleBaseSerializer):
-    username: str
-    scope: str
+    user_id: str | None
+    role_id: str | None

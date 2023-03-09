@@ -19,7 +19,7 @@ from fastapi_pagination import Params
 router = APIRouter(route_class=LoggingRoute)
 
 
-@router.get("/users/me", response_model=UserInDBSerializer)
+@router.get("/me", response_model=UserInDBSerializer)
 async def read_user_me(
     db: Session = Depends(get_db),
     user: User = Depends(get_current_active_user),
@@ -28,7 +28,7 @@ async def read_user_me(
     return user_dao.get(db, id=user.id)
 
 
-@router.patch("/users/me", response_model=UserInDBSerializer)
+@router.patch("/me", response_model=UserInDBSerializer)
 async def update_user_me(
     user_in: UserUpdateSerializer,
     db: Session = Depends(get_db),
@@ -41,7 +41,7 @@ async def update_user_me(
     return user_dao.update(db, db_obj=db_obj, obj_in=user_in.dict(exclude_unset=True))
 
 
-@router.get("/users", response_model=List[UserInDBSerializer])
+@router.get("/", response_model=List[UserInDBSerializer])
 async def read_users(
     params: Params = Depends(),
     user_filter: UserFilter = FilterDepends(UserFilter),
@@ -57,21 +57,21 @@ async def read_users(
     return user_dao.get_multi_paginated(db, user_filter, params)
 
 
-@router.patch("/users/{user_id}", response_model=UserInDBSerializer)
+@router.patch("/{user_id}", response_model=UserInDBSerializer)
 async def update_user(
     user_id: str,
     user_in: UserUpdateSerializer,
     db: Session = Depends(get_db),
     _: Permissions = Depends(Permissions(UserPermissions.user_update)),
 ) -> Any:
-    """Update user me"""
+    """Update user"""
     # Get the business_partner to be updated
     db_obj = user_dao.get(db, id=user_id)
 
-    return user_dao.update(db, db_obj=db_obj, obj_in=user_in.dict(exclude_unset=True))
+    return user_dao.update(db, db_obj=db_obj, obj_in=user_in)
 
 
-@router.post("/register/user", response_model=UserInDBSerializer)
+@router.post("/register/", response_model=UserInDBSerializer)
 def register_user(
     user_data: UserCreateSerializer,
     db: Session = Depends(get_db),

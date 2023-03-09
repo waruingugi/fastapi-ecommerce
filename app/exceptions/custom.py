@@ -94,11 +94,15 @@ class ObjectDoesNotExist(HttpErrorException):
         )
 
 
-class InvalidUserScopeType(Exception):
-    """The specified scope was not found in ´UserScopeTypes´"""
+class CustomHttpException(HttpErrorException):
+    """Raise a HTTP exception with a custom message"""
 
-    def __init__(self, message: str) -> None:
-        self.message = message
+    def __init__(self, message) -> None:
+        super(CustomHttpException, self).__init__(
+            status_code=HTTPStatus.BAD_REQUEST,
+            error_code=ErrorCodes.BAD_REQUEST.name,
+            error_message=message,
+        )
 
 
 class InvalidBusinessPartnerVerificationState(HttpErrorException):

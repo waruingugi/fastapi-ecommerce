@@ -19,8 +19,7 @@ from app.exceptions.custom import (
 )
 from app.users.models import User
 from app.auth.utils.token import check_access_token_is_valid
-from app.roles.models import UserRole
-from app.roles.daos.user_role import user_role_dao
+from app.roles.daos.role import role_dao
 
 
 class TokenData(BaseModel):
@@ -108,11 +107,7 @@ class Permissions:
         db: Session = Depends(get_db),
         token_payload: dict = Depends(get_decoded_token),
     ):
-        role = user_role_dao.get(
-            db,
-            user_id=token_payload["user_id"],
-            load_options=[load_only(UserRole._permissions)],
-        )
+        role = role_dao.get_not_none(db, id=token_payload["role_id"])
 
         required_perms = [perm.value for perm in self.perms]
 

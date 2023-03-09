@@ -19,3 +19,4 @@ class ErrorCodes(str, Enum):
     USER_NOT_FOUND = "This user does not exist in the system"
     OBJECT_NOT_FOUND = "The specified object does not exist"
     ACCESS_DENIED = "You are not permitted to perform this action"
+    BAD_REQUEST = "The server cannot or will not process the request due to an apparent client error"

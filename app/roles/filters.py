@@ -1,5 +1,5 @@
 from fastapi_sqlalchemy_filter import Filter
-from app.roles.models import UserRole
+from app.roles.models import UserRole, Role
 
 
 class UserRoleFilter(Filter):
@@ -8,3 +8,10 @@ class UserRoleFilter(Filter):
 
     class Constants(Filter.Constants):
         model = UserRole
+
+
+class RoleFilter(Filter):
+    name: str | None
+
+    class Constants(Filter.Constants):
+        model = Role

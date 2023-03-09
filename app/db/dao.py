@@ -289,8 +289,13 @@ class ReadDao(Generic[ModelType]):
     ):
         self.model = model
 
-    def get_not_none(self, db: Session, **filters) -> ModelType:
-        obj = self.get(db, **filters)
+    def get_not_none(
+        self,
+        db: Session,
+        load_options: Optional[Sequence[LoadOption]] = None,
+        **filters,
+    ) -> ModelType:
+        obj = self.get(db, load_options, **filters)
         if not obj:
             raise ObjectDoesNotExist
         return obj

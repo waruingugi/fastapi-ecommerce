@@ -4,8 +4,10 @@ from app.core.config import settings
 
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, load_only
 from app.auth.daos.token import token_dao
+from app.roles.daos.user_role import user_role_dao
+from app.roles.models import UserRole
 from app.auth.models import AuthToken
 from app.auth.serializers.token import TokenGrantType, TokenCreateSerializer
 from app.auth.utils.token import check_refresh_token_is_valid
@@ -93,6 +95,14 @@ def create_access_token(db: Session, subject: str, grant_type: str) -> dict:
         "user_id": str(subject),
         "grant_type": grant_type,
     }
+
+    # Add role to token
+    user_role = user_role_dao.get_not_none(
+        db,
+        user_id=to_encode["user_id"],
+        load_options=[load_only(UserRole.role_id)],
+    )
+    to_encode["role_id"] = user_role.role_id
 
     # Create access token
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
