@@ -1,5 +1,5 @@
 from fastapi import Depends, APIRouter
-from app.core.deps import get_db
+from app.core.deps import get_db, Permissions, get_current_active_user
 from app.business_partner.serializers.business_partner import (
     BusinessPartnerInDBSerializer,
     BusinessPartnerCreateExistingOwnerSerializer,
@@ -10,12 +10,12 @@ from sqlalchemy.orm import Session
 from app.business_partner.daos.business_partner import business_partner_dao
 from typing import List
 from app.users.daos.user import user_dao
-from app.core import deps
 from app.users.models import User
 from app.core.logger import LoggingRoute
 from app.business_partner.filters import BusinessPartnerFilter
 from fastapi_sqlalchemy_filter import FilterDepends
 from app.users.constants import UserTypes
+from app.business_partner.permissions import BusinessPartnerPermissions
 
 router = APIRouter(route_class=LoggingRoute)
 
@@ -24,7 +24,9 @@ router = APIRouter(route_class=LoggingRoute)
 async def read_business_partners(
     bp_filter: BusinessPartnerFilter = FilterDepends(BusinessPartnerFilter),
     db: Session = Depends(get_db),
-    _: User = Depends(deps.get_current_active_user),
+    _: Permissions = Depends(
+        Permissions(BusinessPartnerPermissions.business_partner_list)
+    ),
 ) -> Any:
     """Read business partners"""
     bp_filter_dict = bp_filter.dict()
@@ -36,7 +38,9 @@ async def read_business_partners(
 
 @router.post("/business-partner", response_model=BusinessPartnerInDBSerializer)
 async def create_business_partner(
-    bp_in: BusinessPartnerCreateExistingOwnerSerializer, db: Session = Depends(get_db)
+    bp_in: BusinessPartnerCreateExistingOwnerSerializer,
+    db: Session = Depends(get_db),
+    _: User = Depends(get_current_active_user),
 ) -> Any:
     """Create business partner"""
     owner = user_dao.get_not_none(
@@ -58,9 +62,11 @@ async def update_business_partner(
     business_partner_id: str,
     bp_in: BusinessPartnerUpdateSerializer,
     db: Session = Depends(get_db),
+    _: Permissions = Depends(
+        Permissions(BusinessPartnerPermissions.business_partner_update)
+    ),
 ) -> Any:
     """Update business partner"""
-
     # Check whether the business owner exists
     if bp_in.owner_id:
         user_dao.get_not_none(db, id=bp_in.owner_id)
