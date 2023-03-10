@@ -1,5 +1,5 @@
-from sqlalchemy import Column, ForeignKey, String, Boolean
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy import ForeignKey, String, Boolean
+from sqlalchemy.orm import relationship, mapped_column
 from app.db.base_class import Base
 from app.business_partner.constants import (
     BusinessPartnerTypes,
@@ -8,21 +8,21 @@ from app.business_partner.constants import (
 
 
 class BusinessPartner(Base):
-    name: str = Column(String, nullable=False)
-    business_type: str = Column(
+    name = mapped_column(String, nullable=False)
+    business_type = mapped_column(
         String,
         default=BusinessPartnerTypes.SHOP.value,
     )
-    email: str = Column(String, nullable=True)
-    phone: Mapped[str] = Column(String, unique=True, nullable=False, index=True)
-    is_verified = Column(Boolean, default=False)
-    is_physical = Column(Boolean, default=False)
-    verification_state = Column(
+    email = mapped_column(String, nullable=True)
+    phone = mapped_column(String, unique=True, nullable=False, index=True)
+    is_verified = mapped_column(Boolean, default=False)
+    is_physical = mapped_column(Boolean, default=False)
+    verification_state = mapped_column(
         String,
         default=BusinessPartnerVerificationStates.PENDING.value,
     )
-    deleted = Column(Boolean, default=False)
-    owner_id = Column(String, ForeignKey("user.id"), nullable=False)
+    deleted = mapped_column(Boolean, default=False)
+    owner_id = mapped_column(String, ForeignKey("user.id"), nullable=False)
     owner = relationship("User", backref="business_memberships")
     # accepted_payment_methods:
     # location:
