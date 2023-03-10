@@ -72,7 +72,7 @@ async def update_business_partner(
         user_dao.get_not_none(db, id=bp_in.owner_id)
 
     # Get the business_partner to be updated
-    db_obj = business_partner_dao.get(db, id=business_partner_id)
+    db_obj = business_partner_dao.get_not_none(db, id=business_partner_id)
 
     return business_partner_dao.update(
         db, db_obj=db_obj, obj_in=bp_in.dict(exclude_unset=True)

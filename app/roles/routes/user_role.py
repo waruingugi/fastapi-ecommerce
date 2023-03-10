@@ -68,7 +68,7 @@ async def update_user_role(
     _: Permissions = Depends(Permissions(UserRolePermissions.user_role_update)),
 ) -> Any:
     """Update User Role"""
-    db_obj = user_role_dao.get(db, id=user_role_id)
+    db_obj = user_role_dao.get_not_none(db, id=user_role_id)
 
     return user_role_dao.update(db, db_obj=db_obj, obj_in=user_role_in)
 

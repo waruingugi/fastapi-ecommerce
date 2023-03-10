@@ -35,8 +35,8 @@ async def update_user_me(
     user: User = Depends(get_current_active_user),
 ) -> Any:
     """Update user me"""
-    # Get the business_partner to be updated
-    db_obj = user_dao.get(db, id=user.id)
+    # Get the user to be updated
+    db_obj = user_dao.get_not_none(db, id=user.id)
 
     return user_dao.update(db, db_obj=db_obj, obj_in=user_in.dict(exclude_unset=True))
 
@@ -65,8 +65,8 @@ async def update_user(
     _: Permissions = Depends(Permissions(UserPermissions.user_update)),
 ) -> Any:
     """Update user"""
-    # Get the business_partner to be updated
-    db_obj = user_dao.get(db, id=user_id)
+    # Get the user to be updated
+    db_obj = user_dao.get_not_none(db, id=user_id)
 
     return user_dao.update(db, db_obj=db_obj, obj_in=user_in)
 

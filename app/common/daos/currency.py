@@ -4,7 +4,7 @@ from app.common.serializers.currency import (
     CurrencyCreateSerializer,
     CurrencyUpdateSerializer,
 )
-from app.commons.models import Currency
+from app.common.models import Currency
 
 
 class CurrencyDao(
@@ -24,4 +24,4 @@ class CurrencyDao(
         return currency_obj
 
 
-role_dao = CurrencyDao(Currency)
+currency_dao = CurrencyDao(Currency)

@@ -53,6 +53,6 @@ async def update_role(
 ) -> Any:
     """Update role"""
     # Get the business_partner to be updated
-    db_obj = role_dao.get(db, id=role_id)
+    db_obj = role_dao.get_not_none(db, id=role_id)
 
     return role_dao.update(db, db_obj=db_obj, obj_in=role_in)
