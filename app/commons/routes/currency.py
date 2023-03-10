@@ -2,16 +2,16 @@ from app.core.deps import get_db, Permissions, get_current_active_superuser
 from fastapi import APIRouter
 from fastapi import Depends
 from sqlalchemy.orm import Session
-from app.common.serializers.currency import (
+from app.commons.serializers.currency import (
     CurrencyCreateSerializer,
     CurrencyUpdateSerializer,
     CurrencyInDBSerializer,
 )
 from typing import List
-from app.common.daos.currency import currency_dao
+from app.commons.daos.currency import currency_dao
 from app.core.logger import LoggingRoute
-from app.common.permissions import CurrencyPermissions
-from app.common.filters import CurrencyFilter
+from app.commons.permissions import CurrencyPermissions
+from app.commons.filters import CurrencyFilter
 from fastapi_sqlalchemy_filter import FilterDepends
 from typing import Any
 from app.users.models import User

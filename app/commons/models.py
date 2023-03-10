@@ -3,7 +3,7 @@ from sqlalchemy import (
     ForeignKey,
     String,
 )
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship
 
 
 class Currency(Base):
@@ -17,6 +17,8 @@ class Country(Base):
     iso2_code = mapped_column(String, unique=True)
     iso3_code = mapped_column(String, unique=True)
     currency_id = mapped_column(String, ForeignKey("currency.id"))
+
+    currency = relationship("Currency", backref="country")
 
     def __repr__(self) -> str:
         return self.name

@@ -6,3 +6,10 @@ class CurrencyPermissions(BasePermission):
     currency_read = "currency:read"
     currency_update = "currency:update"
     currency_list = "currency:list"
+
+
+class CountryPermissions(BasePermission):
+    country_create = "country:create"
+    country_read = "country:read"
+    country_update = "country:update"
+    country_list = "country:list"
