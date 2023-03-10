@@ -3,12 +3,15 @@ from sqlalchemy import (
     ForeignKey,
     String,
 )
-from sqlalchemy.orm import mapped_column
+from sqlalchemy.orm import mapped_column, relationship
 
 
 class Currency(Base):
     name = mapped_column(String, unique=True)
     code = mapped_column(String, unique=True)
+    country_id = mapped_column(String, ForeignKey("country.id"))
+
+    country = relationship("Country", backref="currency")
 
 
 class Country(Base):
