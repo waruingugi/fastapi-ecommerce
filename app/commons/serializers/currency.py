@@ -20,8 +20,8 @@ class CurrencyCreateSerializer(CurrencyBaseSerializer):
     ...
 
 
-class CurrencyReadSerializer(CurrencyBaseSerializer):
-    pass
+class CurrencyReadSerializer(InDBBaseSerializer, CurrencyBaseSerializer):
+    ...
 
 
 class CurrencyUpdateSerializer(CurrencyBaseSerializer):

@@ -28,4 +28,4 @@ class CountryReadSerializer(CountryBaseSerializer):
 
 
 class CountryUpdateSerializer(CountryBaseSerializer):
-    currency_id: str
+    currency_id: str | None

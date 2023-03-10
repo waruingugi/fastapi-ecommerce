@@ -48,8 +48,8 @@ async def read_countries(
     return country_dao.search(db, country_filter)
 
 
-@router.patch("/{currency_id}", response_model=CountryInDBSerializer)
-async def update_currency(
+@router.patch("/{country_id}", response_model=CountryInDBSerializer)
+async def update_country(
     country_id: str,
     country_in: CountryUpdateSerializer,
     db: Session = Depends(get_db),
