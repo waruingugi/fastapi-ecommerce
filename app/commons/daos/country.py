@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from app.db.dao import CRUDDao
-from app.common.serializers.country import (
+from app.commons.serializers.country import (
     CountryCreateSerializer,
     CountryUpdateSerializer,
 )
-from app.common.models import Country
+from app.commons.models import Country
 
 
 class CountryDao(CRUDDao[Country, CountryCreateSerializer, CountryUpdateSerializer]):

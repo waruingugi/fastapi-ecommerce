@@ -5,7 +5,7 @@ from app.users import api as user_api
 from app.auth import api as auth_api
 from app.business_partner import api as business_partner_api
 from app.roles import api as roles_api
-from app.common import api as common_api
+from app.commons import api as common_api
 from typing import Any
 from asgi_correlation_id import CorrelationIdMiddleware
 

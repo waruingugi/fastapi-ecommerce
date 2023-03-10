@@ -3,7 +3,7 @@ from typing import List
 from app.business_partner.permissions import BusinessPartnerPermissions
 from app.users.permissions import UserPermissions
 from app.roles.permissions import UserRolePermissions, RolePermissions
-from app.common.permissions import CurrencyPermissions
+from app.commons.permissions import CurrencyPermissions, CountryPermissions
 
 # Organize Permissions in hierarchy structure
 # The UserType Roles are written here to serve as a template
@@ -30,6 +30,7 @@ AdminPermissions += (
     BusinessPartnerPermissions.list_()
     + UserPermissions.list_()
     + CurrencyPermissions.list_()
+    + CountryPermissions.list_()
 )
 
 AllAppPermissions: List[BasePermission] = (
@@ -38,6 +39,7 @@ AllAppPermissions: List[BasePermission] = (
     + UserRolePermissions.list_()
     + RolePermissions.list_()
     + CurrencyPermissions.list_()
+    + CountryPermissions.list_()
 )
 
 SuperAdminPermissions: List[BasePermission] = AllAppPermissions

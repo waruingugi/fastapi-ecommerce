@@ -1,10 +1,10 @@
 from sqlalchemy.orm import Session
 from app.db.dao import CRUDDao
-from app.common.serializers.currency import (
+from app.commons.serializers.currency import (
     CurrencyCreateSerializer,
     CurrencyUpdateSerializer,
 )
-from app.common.models import Currency
+from app.commons.models import Currency
 
 
 class CurrencyDao(

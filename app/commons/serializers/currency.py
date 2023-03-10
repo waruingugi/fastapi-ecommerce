@@ -21,7 +21,7 @@ class CurrencyCreateSerializer(CurrencyBaseSerializer):
 
 
 class CurrencyReadSerializer(CurrencyBaseSerializer):
-    ...
+    pass
 
 
 class CurrencyUpdateSerializer(CurrencyBaseSerializer):

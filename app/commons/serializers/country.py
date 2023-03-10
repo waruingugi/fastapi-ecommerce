@@ -1,6 +1,6 @@
 from pydantic import BaseModel, validator
 from app.db.serializer import InDBBaseSerializer
-from app.common.serializers.currency import CurrencyReadSerializer
+from app.commons.serializers.currency import CurrencyReadSerializer
 
 
 class CountryBaseSerializer(BaseModel):
