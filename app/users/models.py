@@ -10,7 +10,7 @@ class User(Base):
     last_name = mapped_column(String, nullable=True)
     phone = mapped_column(String, nullable=False, index=True)
     email = mapped_column(String, unique=True, index=True, nullable=True)
-    is_active = mapped_column(Boolean, default=False)
+    is_active = mapped_column(Boolean, default=True)
     user_type = mapped_column(String, default=UserTypes.CUSTOMER.value)
     hashed_password = mapped_column(String, nullable=False)
 
