@@ -11,6 +11,34 @@ def _create_filtered_query(
     """
     Joins models in query (if the filter is nested) and sorts the query
     """
+
+    def join_models(query, search_filter_class):
+        """Recursive func to join models to query from nested search filter dict"""
+        nested_model = None
+        search_filter_dict = search_filter_class.dict(
+            exclude_none=True, exclude_unset=True  # Remove fields with None values
+        )
+
+        for key, value in search_filter_dict.items():
+            # If value is dict, there's probably another model to be joined
+            # inside - so use recursion to travers nested dict.
+            if (type(value) is dict) and hasattr(search_filter_class, key):
+                nested_filter = getattr(search_filter_class, key)
+                # Get nested model...
+                if isinstance(nested_filter, Filter):
+                    # Then join the model to the query
+                    nested_model = nested_filter.Constants.model
+                    print(nested_model)
+
+                    query = query.join(nested_model, isouter=True)
+
+                search_filter_class = getattr(search_filter_class, key)
+                query = join_models(query, search_filter_class)
+
+        search_query = search_filter_class.filter(query)
+
+        return search_filter_class.sort(search_query)
+
     if type(search_filter) is dict:
         search_filter_class = Filter(**search_filter)
 
@@ -18,21 +46,6 @@ def _create_filtered_query(
         model = query.column_descriptions[0]["entity"]
         search_filter_class.Constants.model = model
     else:
-        search_filter_class: Filter = deepcopy(search_filter)
+        search_filter_class: Filter = deepcopy(search_filter)  # type:ignore
 
-    search_filter_dict = search_filter_class.dict(
-        exclude_none=True, exclude_unset=True  # Remove fields with None values
-    )
-
-    for key, value in search_filter_dict.items():
-        if (type(value) is dict) and hasattr(search_filter_class, key):
-            nested_filter = getattr(search_filter_class, key)
-            # Get nested model...
-            if isinstance(nested_filter, Filter):
-                # Then join the model to the query
-                nested_model = nested_filter.Constants.model
-                query = query.join(nested_model, isouter=True)
-
-    search_query = search_filter_class.filter(query)
-
-    return search_filter_class.sort(search_query)
+    return join_models(query, search_filter_class)

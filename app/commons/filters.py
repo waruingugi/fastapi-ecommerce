@@ -10,11 +10,17 @@ class CurrencyFilter(Filter):
         model = Currency
 
 
-class CountryFilter(Filter):
+class CountryBaseFilter(Filter):
+    class Constants(Filter.Constants):
+        model = Country
+
+
+class CountryFilter(CountryBaseFilter):
     dialing_code: str | None
     name: str | None
     iso2_code: str | None
     iso3_code: str | None
 
-    class Constants(Filter.Constants):
-        model = Country
+
+class CountryScopeFilter(CountryBaseFilter):
+    iso3_code__in: list[str] | None

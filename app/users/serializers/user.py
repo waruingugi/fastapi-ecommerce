@@ -6,6 +6,7 @@ from app.core.helpers import (
     _validate_email,
 )
 from app.db.serializer import InDBBaseSerializer
+from app.commons.serializers.country import CountryReadSerializer
 from datetime import datetime
 from app.db.base_class import generate_uuid
 from typing import List, Optional
@@ -43,6 +44,7 @@ class UserBaseSerializer(BaseModel):
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
     password: str | None
+    country_id: str
 
     @validator("password", pre=True, always=True)
     def generate_random_password(cls, value):
@@ -53,12 +55,14 @@ class UserUpdateSerializer(UserBaseSerializer):
     user_type: str | None
     is_active: bool | None
     password: str | None
+    country_id: str | None
 
 
 class UserInDBSerializer(InDBBaseSerializer, UserBaseSerializer):
     user_type: str
     date_joined: datetime
     is_active: bool
+    country: CountryReadSerializer | None
     business_memberships: Optional[List[BusinessParnterReadSerializer]]
 
 

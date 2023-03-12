@@ -100,9 +100,10 @@ def create_access_token(db: Session, subject: str, grant_type: str) -> dict:
     user_role = user_role_dao.get_not_none(
         db,
         user_id=to_encode["user_id"],
-        load_options=[load_only(UserRole.role_id)],
+        load_options=[load_only(UserRole.role_id, UserRole.scope)],
     )
     to_encode["role_id"] = user_role.role_id
+    to_encode["scope"] = list(set(user_role.scope))
 
     # Create access token
     token = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)

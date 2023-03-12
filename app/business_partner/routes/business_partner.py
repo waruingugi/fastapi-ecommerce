@@ -1,5 +1,10 @@
 from fastapi import Depends, APIRouter
-from app.core.deps import get_db, Permissions, get_current_active_user
+from app.core.deps import (
+    get_db,
+    Permissions,
+    get_current_active_user,
+    RestrictBusinessPartnerFilter,
+)
 from app.business_partner.serializers.business_partner import (
     BusinessPartnerInDBSerializer,
     BusinessPartnerCreateExistingOwnerSerializer,
@@ -27,13 +32,18 @@ async def read_business_partners(
     _: Permissions = Depends(
         Permissions(BusinessPartnerPermissions.business_partner_list)
     ),
+    restrict_bp_filter: RestrictBusinessPartnerFilter = Depends(
+        RestrictBusinessPartnerFilter
+    ),
 ) -> Any:
     """Read business partners"""
     bp_filter_dict = bp_filter.dict()
+    search_filter = restrict_bp_filter(search_filter=bp_filter)
+
     if not any(bp_filter_dict.values()):  # Returns True if all values are falsy/None
         return business_partner_dao.get_all(db)
 
-    return business_partner_dao.search(db, bp_filter)
+    return business_partner_dao.search(db, search_filter)
 
 
 @router.post("/business-partner", response_model=BusinessPartnerInDBSerializer)

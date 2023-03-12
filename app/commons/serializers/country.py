@@ -38,7 +38,7 @@ class CountryCreateSerializer(CountryBaseSerializer):
     currency_id: str
 
 
-class CountryReadSerializer(CountryBaseSerializer):
+class CountryReadSerializer(InDBBaseSerializer, CountryBaseSerializer):
     ...
 
 

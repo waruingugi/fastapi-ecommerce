@@ -333,8 +333,8 @@ class ReadDao(Generic[ModelType]):
     def search(
         self: Union[Any, DaoInterface],
         db: Session,
-        search_filter: Filter,
-    ) -> Optional[ModelType]:
+        search_filter: Filter | Dict,
+    ) -> Sequence[Row]:
         query = db.query(self.model)
         query = _create_filtered_query(query, search_filter)
 
@@ -343,7 +343,7 @@ class ReadDao(Generic[ModelType]):
     def get_multi_paginated(
         self: Union[Any, DaoInterface],
         db: Session,
-        search_filter: Filter,
+        search_filter: Filter | Dict,
         params: Params,
     ) -> Sequence[Row]:
         query = db.query(self.model)
