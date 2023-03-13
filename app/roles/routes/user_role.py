@@ -73,16 +73,6 @@ async def update_user_role(
     return user_role_dao.update(db, db_obj=db_obj, obj_in=user_role_in)
 
 
-# Search query
-# - Scope, create model country
-# - Remove adminpermissions,
-# - Create permissions
-# - Assign users permissions
-# Delete user role permissions
-# Check everything works
-# Admin create
-# Nested filter in user role test
-# Mapped columns
-# Create scope under role after adding countries
-# - Celery
+# - Multi-paginated vs search with params
+# - country in business partner
 # Redis

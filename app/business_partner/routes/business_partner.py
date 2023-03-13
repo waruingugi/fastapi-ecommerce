@@ -21,12 +21,14 @@ from app.business_partner.filters import BusinessPartnerFilter
 from fastapi_sqlalchemy_filter import FilterDepends
 from app.users.constants import UserTypes
 from app.business_partner.permissions import BusinessPartnerPermissions
+from fastapi_pagination import Params
 
 router = APIRouter(route_class=LoggingRoute)
 
 
 @router.get("/business-partner", response_model=List[BusinessPartnerInDBSerializer])
 async def read_business_partners(
+    params: Params = Depends(),
     bp_filter: BusinessPartnerFilter = FilterDepends(BusinessPartnerFilter),
     db: Session = Depends(get_db),
     _: Permissions = Depends(
@@ -41,7 +43,7 @@ async def read_business_partners(
     search_filter = restrict_bp_filter(search_filter=bp_filter)
 
     if not any(bp_filter_dict.values()):  # Returns True if all values are falsy/None
-        return business_partner_dao.get_all(db)
+        return business_partner_dao.get_multi_paginated(db, bp_filter, params)
 
     return business_partner_dao.search(db, search_filter)
 

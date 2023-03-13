@@ -1,5 +1,6 @@
 from fastapi_sqlalchemy_filter import Filter
 from app.commons.models import Currency, Country
+from pydantic import Field
 
 
 class CurrencyFilter(Filter):
@@ -16,8 +17,7 @@ class CountryBaseFilter(Filter):
 
 
 class CountryFilter(CountryBaseFilter):
-    dialing_code: str | None
-    name: str | None
+    name__ilike: str | None = Field(alias="country_name")
     iso2_code: str | None
 
 
