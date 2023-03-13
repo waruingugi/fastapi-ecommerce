@@ -14,7 +14,6 @@ def _create_filtered_query(
 
     def join_models(query, search_filter_class):
         """Recursive func to join models to query from nested search filter dict"""
-        nested_model = None
         search_filter_dict = search_filter_class.dict(
             exclude_none=True, exclude_unset=True  # Remove fields with None values
         )
@@ -35,9 +34,9 @@ def _create_filtered_query(
                 search_filter_class = getattr(search_filter_class, key)
                 query = join_models(query, search_filter_class)
 
-        search_query = search_filter_class.filter(query)
+        # search_query = search_filter_class.filter(query)
 
-        return search_filter_class.sort(search_query)
+        return query
 
     if type(search_filter) is dict:
         search_filter_class = Filter(**search_filter)
@@ -48,4 +47,7 @@ def _create_filtered_query(
     else:
         search_filter_class: Filter = deepcopy(search_filter)  # type:ignore
 
-    return join_models(query, search_filter_class)
+    query = join_models(query, search_filter_class)
+    search_query = search_filter_class.filter(query)
+
+    return search_filter_class.sort(search_query)

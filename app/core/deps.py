@@ -119,10 +119,6 @@ class Permissions:
                 raise AccessDenied
 
 
-# Put import here instead of above to prevent circular import
-from app.core.deps import get_db, get_decoded_token  # noqa
-
-
 class RestrictBusinessPartnerFilter:
     def __init__(
         self,
@@ -133,10 +129,30 @@ class RestrictBusinessPartnerFilter:
         self.token = token
 
     def __call__(self, *, search_filter) -> Filter:
-        """Restrict Business Partner Filter or Query based on scope"""
+        """Restrict Business Partner Filter or Query based on scope
+        *** Note: This depends on the existence of owner field in filter ***"""
         if hasattr(search_filter, "owner"):
             search_filter.owner.country = CountryScopeFilter(
                 iso3_code__in=self.token["scope"]
             )
+
+        return search_filter
+
+
+class RestrictUserFilter:
+    def __init__(
+        self,
+        db: Session = Depends(get_db),
+        token: dict = Depends(get_decoded_token),
+    ) -> None:
+        self.db = db
+        self.token = token
+
+    def __call__(self, *, search_filter) -> Filter:
+        """Restrict User Filter or Query based on scope
+        *** Note: This depends on the existence of country filter ***
+        """
+        if hasattr(search_filter, "country"):
+            search_filter.country.iso3_code__in = self.token["scope"]
 
         return search_filter

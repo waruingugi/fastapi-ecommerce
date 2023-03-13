@@ -19,7 +19,6 @@ class CountryFilter(CountryBaseFilter):
     dialing_code: str | None
     name: str | None
     iso2_code: str | None
-    iso3_code: str | None
 
 
 class CountryScopeFilter(CountryBaseFilter):

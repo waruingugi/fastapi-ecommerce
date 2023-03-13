@@ -15,7 +15,7 @@ class UserBaseFilter(Filter):
         search_model_fields = ["phone", "email"]
 
 
-class UserFilter(UserBaseFilter, Filter):
+class UserFilter(UserBaseFilter):
     is_active: bool | None
     user_type: UserTypes | None
     order_by: List[str] | None
