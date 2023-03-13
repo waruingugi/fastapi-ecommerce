@@ -14,7 +14,7 @@ class BusinessPartnerBaseFilter(Filter):
         search_model_fields = ["phone", "email"]
 
 
-class BusinessPartnerFilter(BusinessPartnerBaseFilter, Filter):
+class BusinessPartnerFilter(BusinessPartnerBaseFilter):
     name__ilike: str | None = Field(alias="name")
     is_verified: bool | None
     owner: UserBaseFilter | None = FilterDepends(with_prefix("owner", UserBaseFilter))
