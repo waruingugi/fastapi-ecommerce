@@ -27,14 +27,11 @@ def _create_filtered_query(
                 if isinstance(nested_filter, Filter):
                     # Then join the model to the query
                     nested_model = nested_filter.Constants.model
-                    print(nested_model)
 
                     query = query.join(nested_model, isouter=True)
 
                 search_filter_class = getattr(search_filter_class, key)
                 query = join_models(query, search_filter_class)
-
-        # search_query = search_filter_class.filter(query)
 
         return query
 

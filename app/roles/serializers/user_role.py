@@ -14,7 +14,7 @@ class UserRoleBaseSerializer(BaseModel):
     def validate_scope(cls, value) -> str:
         """Assert scope is valid iso3_code length and is capitals"""
         for scope in value:
-            if (not scope.isupper()) or (not len(scope) == 3):
+            if (not scope.isupper()) or (not len(scope) == 2):
                 raise CustomHttpException(f"Invalid scope {value}")
         return value
 

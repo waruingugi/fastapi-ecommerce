@@ -27,3 +27,4 @@ class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSeria
     is_physical: bool
     verification_state: str
     owner: UserReadSerializer
+    country: str

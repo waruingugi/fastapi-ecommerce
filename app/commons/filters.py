@@ -18,8 +18,8 @@ class CountryBaseFilter(Filter):
 
 class CountryFilter(CountryBaseFilter):
     name__ilike: str | None = Field(alias="country_name")
-    iso2_code: str | None
+    iso3_code__ilike: str | None = Field(alias="iso3_code")
 
 
 class CountryScopeFilter(CountryBaseFilter):
-    iso3_code__in: list[str] | None
+    iso2_code__in: list[str] | None

@@ -44,7 +44,7 @@ class UserBaseSerializer(BaseModel):
 class UserCreateSerializer(UserBaseSerializer):
     phone: str
     password: str | None
-    country_id: str
+    country_id: str | None
 
     @validator("password", pre=True, always=True)
     def generate_random_password(cls, value):
