@@ -24,10 +24,9 @@ class BusinessPartner(Base):
     deleted = mapped_column(Boolean, default=False)
     owner_id = mapped_column(String, ForeignKey("user.id"), nullable=False)
     owner = relationship("User", backref="business_memberships")
-    # accepted_payment_methods:
-    # location:
-    # country
-    # currency
+
+    country_id = mapped_column(String, ForeignKey("country.id"))
+    country = relationship("Country", backref="country")
 
     @property
     def contact(self):
