@@ -34,8 +34,6 @@ def _create_filtered_query(
                 search_filter_class = getattr(search_filter_class, key)
                 query = join_models(query, search_filter_class)
 
-        # search_query = search_filter_class.filter(query)
-
         return query
 
     if type(search_filter) is dict:

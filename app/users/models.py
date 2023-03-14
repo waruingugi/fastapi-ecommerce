@@ -15,7 +15,7 @@ class User(Base):
     hashed_password = mapped_column(String, nullable=False)
 
     country_id = mapped_column(String, ForeignKey("country.id"))
-    country = relationship("Country", backref="country")
+    country = relationship("Country", backref="user_country")
 
     @property
     def get_username(self) -> str:

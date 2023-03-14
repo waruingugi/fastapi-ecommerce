@@ -7,7 +7,6 @@ from app.commons.filters import CountryFilter
 
 class UserBaseFilter(Filter):
     contact: str | None
-    country: CountryFilter | None = FilterDepends(with_prefix("country", CountryFilter))
 
     class Constants(Filter.Constants):
         model = User
@@ -18,4 +17,5 @@ class UserBaseFilter(Filter):
 class UserFilter(UserBaseFilter):
     is_active: bool | None
     user_type: UserTypes | None
+    country: CountryFilter | None = FilterDepends(with_prefix("country", CountryFilter))
     order_by: List[str] | None

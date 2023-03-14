@@ -26,7 +26,7 @@ class BusinessPartner(Base):
     owner = relationship("User", backref="business_memberships")
 
     country_id = mapped_column(String, ForeignKey("country.id"))
-    country = relationship("Country", backref="country")
+    country = relationship("Country", backref="business_country")
 
     @property
     def contact(self):

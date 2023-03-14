@@ -21,7 +21,7 @@ from app.users.models import User
 from app.auth.utils.token import check_access_token_is_valid
 from app.roles.daos.role import role_dao
 
-from app.commons.filters import CountryScopeFilter
+from app.commons.filters import CountryScopeFilter  # noqa
 from fastapi_sqlalchemy_filter import Filter
 
 
@@ -131,10 +131,10 @@ class RestrictBusinessPartnerFilter:
     def __call__(self, *, search_filter) -> Filter:
         """Restrict Business Partner Filter or Query based on scope
         *** Note: This depends on the existence of owner field in filter ***"""
-        if hasattr(search_filter, "owner"):
-            search_filter.owner.country = CountryScopeFilter(
-                iso3_code__in=self.token["scope"]
-            )
+        # if hasattr(search_filter, "owner"):
+        #     search_filter.owner.country = CountryScopeFilter(
+        #         iso3_code__in=self.token["scope"]
+        #     )
 
         return search_filter
 

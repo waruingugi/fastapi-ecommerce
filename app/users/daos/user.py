@@ -29,7 +29,10 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
             role = role_dao.get_not_none(db, name=user.user_type)
 
             user_role_dao.create(
-                db, obj_in=UserRoleCreateSerializer(user_id=user.id, role_id=role.id)
+                db,
+                obj_in=UserRoleCreateSerializer(
+                    user_id=user.id, role_id=role.id, scope=[user.country.iso3_code]
+                ),
             )
 
     def on_post_update(self, db: Session, db_obj: User, changed: Dict) -> None:
