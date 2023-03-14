@@ -131,10 +131,8 @@ class RestrictBusinessPartnerFilter:
     def __call__(self, *, search_filter) -> Filter:
         """Restrict Business Partner Filter or Query based on scope
         *** Note: This depends on the existence of owner field in filter ***"""
-        # if hasattr(search_filter, "owner"):
-        #     search_filter.owner.country = CountryScopeFilter(
-        #         iso3_code__in=self.token["scope"]
-        #     )
+        if hasattr(search_filter, "owner"):
+            search_filter.owner.country.iso2_code__in = self.token["scope"]
 
         return search_filter
 
@@ -153,6 +151,6 @@ class RestrictUserFilter:
         *** Note: This depends on the existence of country filter ***
         """
         if hasattr(search_filter, "country"):
-            search_filter.country.iso3_code__in = self.token["scope"]
+            search_filter.country.iso2_code__in = self.token["scope"]
 
         return search_filter

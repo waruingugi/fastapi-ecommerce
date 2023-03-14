@@ -21,12 +21,8 @@ class BusinessPartner(Base):
         String,
         default=BusinessPartnerVerificationStates.PENDING.value,
     )
-    deleted = mapped_column(Boolean, default=False)
     owner_id = mapped_column(String, ForeignKey("user.id"), nullable=False)
     owner = relationship("User", backref="business_memberships")
-
-    country_id = mapped_column(String, ForeignKey("country.id"))
-    country = relationship("Country", backref="business_country")
 
     @property
     def contact(self):
@@ -34,3 +30,7 @@ class BusinessPartner(Base):
             return self.phone
         else:
             return self.email
+
+    @property
+    def country(self):
+        return self.owner.country.name

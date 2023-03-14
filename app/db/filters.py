@@ -27,7 +27,6 @@ def _create_filtered_query(
                 if isinstance(nested_filter, Filter):
                     # Then join the model to the query
                     nested_model = nested_filter.Constants.model
-                    print(nested_model)
 
                     query = query.join(nested_model, isouter=True)
 

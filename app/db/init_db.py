@@ -3,11 +3,9 @@ from sqlalchemy.orm import Session
 
 from app.users.daos.user import user_dao
 from app.users.serializers.user import UserCreateSerializer
-from app.users.constants import UserTypes
 from app.db import base  # noqa
 
 from app.core.config import settings
-
 
 
 logger = logging.getLogger(__name__)
@@ -34,8 +32,7 @@ def init_db(db: Session) -> None:
                 phone=settings.SUPERUSER_PHONE,
                 email=settings.SUPERUSER_EMAIL,
                 password=settings.SUPERUSER_PASSWORD,
-                user_type=UserTypes.SUPERADMIN.value,
-                is_active=True
+                country_id=None,
             )
             user = user_dao.create(db, obj_in=user_in)  # noqa
         else:

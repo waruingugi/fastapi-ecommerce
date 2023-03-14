@@ -25,7 +25,7 @@ class CountryBaseSerializer(BaseModel):
     @validator("iso3_code", pre=True)
     def is_valid_iso3_code(cls, value) -> str:
         """Check iso3_code length"""
-        if len(value) > 3:
+        if not len(value) == 3:
             raise CustomHttpException(f"Invalid iso3_code {value}")
         return value.upper()
 

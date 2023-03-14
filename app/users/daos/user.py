@@ -6,6 +6,7 @@ from app.db.dao import CRUDDao
 from app.users.models import User
 from app.roles.daos.role import role_dao
 from app.roles.daos.user_role import user_role_dao
+from app.commons.daos.country import country_dao
 from app.roles.serializers.user_role import (
     UserRoleCreateSerializer,
 )
@@ -17,6 +18,7 @@ from app.users.serializers.user import (
 from app.users.constants import UserTypes
 from app.core.security import get_password_hash, verify_password
 from pyisemail import is_email
+from phonenumbers import parse as parse_phone_number
 from typing import List
 
 
@@ -27,11 +29,12 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
         for user in db_obj:
             """Create a role that enables the user to access endpoints"""
             role = role_dao.get_not_none(db, name=user.user_type)
-
             user_role_dao.create(
                 db,
                 obj_in=UserRoleCreateSerializer(
-                    user_id=user.id, role_id=role.id, scope=[user.country.iso3_code]
+                    user_id=user.id,
+                    role_id=role.id,
+                    scope=[str(user.country.iso2_code)],
                 ),
             )
 
@@ -76,10 +79,20 @@ class UserDao(CRUDDao[User, UserCreateSerializer, UserUpdateSerializer]):
 
     def create(self, db: Session, *, obj_in: UserCreateSerializer) -> User:
         create_user_data = obj_in.dict()
+
+        # Automatically set country id
+        if not create_user_data.get("country_id", None):
+            phone_number = parse_phone_number(create_user_data["phone"])
+            country = country_dao.get_not_none(
+                db, dialing_code=("+" + str(phone_number.country_code))
+            )
+            create_user_data["country_id"] = country.id
+
+        # Hash the password
         create_user_data.pop("password")
 
         db_obj = User(**create_user_data)
-        db_obj.hashed_password = get_password_hash(obj_in.password)
+        db_obj.hashed_password = get_password_hash(obj_in.password)  # type: ignore
 
         db.add(db_obj)
         db.commit()

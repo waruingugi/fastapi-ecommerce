@@ -4,7 +4,6 @@ from app.users.serializers.user import (
     UserReadSerializer,
     BusinessPartnerBaseSerializer,
 )
-from app.commons.serializers.country import CountryReadSerializer
 from app.core.helpers import _validate_bp_verification_state
 
 
@@ -12,14 +11,12 @@ class BusinessPartnerCreateExistingOwnerSerializer(BusinessPartnerBaseSerializer
     name: str
     business_type: str | None = BusinessPartnerTypes.SHOP.value
     owner_id: str
-    country_id: str
 
 
 class BusinessPartnerUpdateSerializer(BusinessPartnerBaseSerializer):
     phone: str | None
     verification_state: str | None
     owner_id: str | None
-    country_id: str | None
 
     _validate_bp_verification_state = _validate_bp_verification_state
 
@@ -30,4 +27,4 @@ class BusinessPartnerInDBSerializer(InDBBaseSerializer, BusinessPartnerBaseSeria
     is_physical: bool
     verification_state: str
     owner: UserReadSerializer
-    country: CountryReadSerializer | None
+    country: str
