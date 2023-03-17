@@ -3,11 +3,13 @@ import logging
 from tenacity import after_log, before_log, retry, stop_after_attempt, wait_fixed
 from app.db.session import SessionLocal
 from sqlalchemy import text
+from app.core.config import redis as redis_server
+import redis
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
+from app.core.raw_logger import logger
 
 max_tries = 60 * 5  # 5 minutes
+redis_server_max_tries = 3
 wait_seconds = 1
 
 
@@ -27,10 +29,21 @@ def init() -> None:
         raise e
 
 
+def redis_is_running() -> None:
+    try:
+        redis_server.ping()
+    except redis.ConnectionError as e:
+        logger.error(e)
+        raise e
+
+
 def main() -> None:
     logger.info("Initailizing service")
     init()
     logger.info("Service finished initializing")
+    logger.info("Checking redis-server is up")
+    redis_is_running()
+    logger.info("Redis-server is running")
 
 
 if __name__ == "__main__":

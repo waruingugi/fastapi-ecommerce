@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from passlib.context import CryptContext
-from app.core.config import settings
+from app.core.config import settings, redis
+from app.core.helpers import md5_hash
 
 # from app.auth.serializers.auth import TokenData
 from jose import JWTError, jwt
@@ -45,6 +46,17 @@ def get_access_token(db: Session, *, user_id: str) -> AuthToken:
         is_active=True,
     )
 
+    # Schedule commands for redis
+    # (we're stroing access token and refresh token to avoid querying the db)
+    redis_pipeline = redis.pipeline()
+    redis_pipeline.set(
+        md5_hash(token_data["access_token"]), 1, ex=token_data["access_token_ein"]
+    )
+    redis_pipeline.set(
+        md5_hash(token_data["refresh_token"]), 1, ex=token_data["refresh_ein"]
+    )
+    redis_pipeline.execute()
+
     return token_dao.create(db, obj_in=obj_in)
 
 
@@ -66,6 +78,8 @@ def get_decoded_refresh_token(
         except (JWTError, ValidationError):
             raise InvalidToken
     else:
+        # First delete the refresh token from redis, then raise an error
+        redis.delete(md5_hash(token))
         raise ExpiredRefreshToken
 
 

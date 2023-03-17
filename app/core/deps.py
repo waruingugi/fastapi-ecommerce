@@ -20,8 +20,9 @@ from app.exceptions.custom import (
 from app.users.models import User
 from app.auth.utils.token import check_access_token_is_valid
 from app.roles.daos.role import role_dao
+from app.core.config import redis
+from app.core.helpers import md5_hash
 
-from app.commons.filters import CountryScopeFilter  # noqa
 from fastapi_sqlalchemy_filter import Filter
 
 
@@ -66,6 +67,8 @@ async def get_decoded_token(
         except (JWTError, ValidationError):
             raise InvalidToken
     else:
+        # First delete the token from redis, then raise an error
+        redis.delete(md5_hash(token))
         raise ExpiredAccessToken
 
 
