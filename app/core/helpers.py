@@ -14,6 +14,7 @@ from pyisemail import is_email
 
 from app.exceptions.custom import InvalidBusinessPartnerVerificationState
 from app.business_partner.constants import BusinessPartnerVerificationStates
+from hashlib import md5
 
 
 PHONE_NUMBER_TYPES = PhoneNumberType.MOBILE, PhoneNumberType.FIXED_LINE_OR_MOBILE
@@ -90,3 +91,8 @@ _validate_bp_verification_state = validator(
 def convert_perms_list_to_string(perms_list: List[str]) -> str:
     """Convert permissions list to string"""
     return ", ".join(map(str, set(perms_list))) if perms_list else ""
+
+
+def md5_hash(value: str) -> str:
+    """Convert string value into hash"""
+    return md5(value.encode()).hexdigest()

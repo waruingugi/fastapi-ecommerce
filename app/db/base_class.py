@@ -1,9 +1,9 @@
 from sqlalchemy.ext.declarative import declarative_base, declared_attr
-from sqlalchemy import Column, DateTime, String
+from sqlalchemy import DateTime, String
 from sqlalchemy.orm import Mapped
-from sqlalchemy import event
 from typing import Dict
 from sqlalchemy_utils import get_columns
+from sqlalchemy.orm import mapped_column
 
 import uuid
 from datetime import datetime
@@ -24,11 +24,9 @@ class Base(BaseClass):
     __name__: str
 
     # All tables inheriting from Base class contains this columns
-    id: Mapped[str] = Column(String, primary_key=True, default=generate_uuid)
-    created_at: Mapped[datetime] = Column(
-        DateTime, default=get_current_datetime, nullable=False
-    )
-    updated_at = Column(
+    id: Mapped[str] = mapped_column(String, primary_key=True, default=generate_uuid)
+    created_at = mapped_column(DateTime, default=get_current_datetime, nullable=False)
+    updated_at = mapped_column(
         DateTime, default=None, onupdate=get_current_datetime, nullable=True
     )
 
