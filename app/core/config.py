@@ -14,8 +14,14 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 24
     REFRESH_TOKEN_EXPIRY_IN_SECONDS: int = 60 * 60 * 7
 
-    SQLALCHEMY_DATABASE_URI: PostgresDsn = None
-    ASYNC_SQLALCHEMY_DATABASE_URI: PostgresDsn = None
+    POSTGRES_USER: str
+    POSTGRES_PASSWORD: str
+    POSTGRES_SERVER: str = "localhost"
+    POSTGRES_PORT: str = "5432"
+    POSTGRES_DB: str
+
+    # SQLALCHEMY_DATABASE_URI: PostgresDsn
+    # ASYNC_SQLALCHEMY_DATABASE_URI: PostgresDsn
 
     SUPERUSER_FIRST_NAME: str
     SUPERUSER_LAST_NAME: str
@@ -40,6 +46,25 @@ def get_app_settings() -> Settings:
 
 # settings = Settings()
 settings = cast(Settings, get_app_settings())
+
+
+ASYNC_SQLALCHEMY_DATABASE_URI = PostgresDsn.build(
+    scheme="postgresql+asyncpg",
+    user=settings.POSTGRES_USER,
+    password=settings.POSTGRES_PASSWORD,
+    host=settings.POSTGRES_SERVER,
+    path=f"/{settings.POSTGRES_DB}",
+    port=settings.POSTGRES_PORT,
+)
+
+SQLALCHEMY_DATABASE_URI = PostgresDsn.build(
+    scheme="postgresql+psycopg2",
+    user=settings.POSTGRES_USER,
+    password=settings.POSTGRES_PASSWORD,
+    host=settings.POSTGRES_SERVER,
+    path=f"/{settings.POSTGRES_DB}",
+    port=settings.POSTGRES_PORT,
+)
 
 
 @lru_cache
