@@ -1,19 +1,15 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.asyncio import (
-    AsyncEngine,
-    create_async_engine,
-    AsyncSession
-)
-from app.core.config import settings
+from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine, AsyncSession
+from app.core.config import ASYNC_SQLALCHEMY_DATABASE_URI, SQLALCHEMY_DATABASE_URI
 from functools import lru_cache
 from sqlalchemy.engine import Engine
 
 
-lru_cache
+@lru_cache
 def get_engine() -> Engine:
     return create_engine(
-        settings.SQLALCHEMY_DATABASE_URI,
+        SQLALCHEMY_DATABASE_URI,
         future=True,
         echo=True,
         pool_pre_ping=True,
@@ -23,11 +19,11 @@ def get_engine() -> Engine:
         },
     )
 
-## Check class type
-lru_cache
+
+@lru_cache
 def get_async_engine() -> AsyncEngine:
     return create_async_engine(
-        settings.ASYNC_SQLALCHEMY_DATABASE_URI,
+        ASYNC_SQLALCHEMY_DATABASE_URI,
         pool_pre_ping=True,
         echo=True,
         connect_args={
