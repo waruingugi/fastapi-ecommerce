@@ -35,7 +35,6 @@ async def create_country(
 async def read_countries(
     country_filter: CountryFilter = FilterDepends(CountryFilter),
     db: Session = Depends(get_db),
-    _: Permissions = Depends(Permissions(CountryPermissions.country_read)),
 ) -> Any:
     """Read countries"""
     country_filter_dict = country_filter.dict()
