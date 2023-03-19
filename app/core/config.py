@@ -78,5 +78,4 @@ def get_redis() -> Redis:
     )
 
 
-# settings = Settings()
 redis = cast(Redis, get_redis())

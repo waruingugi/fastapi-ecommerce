@@ -12,7 +12,7 @@ as they are in real world companies.
 Any other feature that wasn't within the scope of learning advanced FastAPI implemention was termed as just adding aesthetic value.
 And by definition, most of it would have been easy to learn through FastAPI tutorials online.
 This project was to learn what you wouldn't find easily online but expected to grasp while in employment.
-Hopefully some-day I'll create a tutorial for it.
+Hopefully someday I'll create a tutorial for it.
 
 ---
 ## Advanced features
