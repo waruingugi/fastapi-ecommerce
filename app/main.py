@@ -15,9 +15,11 @@ def get_application() -> FastAPI:
         title=settings.PROJECT_NAME,
         description="""
             Learning FastAPI by building an industry grade application.
+            Github link: https://github.com/waruingugi/fastapi-ecommerce
         """,
         version=settings.API_VERSION,
         swagger_ui_parameters={"persistAuthorization": True},
+        docs_url="/",
     )
 
     application.include_router(auth_api.router, prefix=settings.API_V1_STR)
