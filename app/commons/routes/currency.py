@@ -33,7 +33,6 @@ async def create_currency(
 async def read_currencies(
     currency_filter: CurrencyFilter = FilterDepends(CurrencyFilter),
     db: Session = Depends(get_db),
-    _: Permissions = Depends(Permissions(CurrencyPermissions.currency_list)),
 ) -> Any:
     """Read currencies"""
     currency_filter_dict = currency_filter.dict()
