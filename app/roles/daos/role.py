@@ -5,21 +5,21 @@ from app.roles.serializers.role import (
     RoleCreateSerializer,
 )
 from app.roles.models import Role
-from app.core.helpers import convert_perms_list_to_string
+from app.core.helpers import convert_list_to_string
 
 
 class RoleDao(CRUDDao[Role, RoleCreateSerializer, RoleUpdateSerializer]):
     def on_pre_create(
         self, db: Session, id: str, values: dict, orig_values: dict
     ) -> None:
-        values["permissions"] = convert_perms_list_to_string(
+        values["permissions"] = convert_list_to_string(
             orig_values.get("permissions", [])
         )
 
     def on_pre_update(
         self, db: Session, db_obj: Role, values: dict, orig_values: dict
     ) -> None:
-        values["permissions"] = convert_perms_list_to_string(
+        values["permissions"] = convert_list_to_string(
             orig_values.get("permissions", [])
         )
 

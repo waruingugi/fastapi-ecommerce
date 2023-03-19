@@ -7,7 +7,6 @@ from sqlalchemy import (
 from sqlalchemy.orm import relationship, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 from typing import List
-from sqlalchemy.dialects.postgresql import ARRAY
 
 
 class Role(Base):
@@ -24,6 +23,12 @@ class Role(Base):
 class UserRole(Base):
     user_id = mapped_column(String, ForeignKey("user.id", ondelete="CASCADE"))
     role_id = mapped_column(String, ForeignKey("role.id", ondelete="CASCADE"))
-    scope = mapped_column(ARRAY(String), server_default="{}")
+    _scope = mapped_column("scope", Text())
 
     user = relationship("User", backref="user_role")
+
+    @hybrid_property
+    def scope(self) -> List[str]:
+        if self._scope:
+            return self._scope.replace(" ", "").split(",")
+        return []

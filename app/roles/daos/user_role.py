@@ -5,11 +5,22 @@ from app.roles.serializers.user_role import (
     UserRoleCreateSerializer,
 )
 from app.roles.models import UserRole
+from app.core.helpers import convert_list_to_string
 
 
 class UserRoleDao(
     CRUDDao[UserRole, UserRoleCreateSerializer, UserRoleUpdateSerializer]
 ):
+    def on_pre_create(
+        self, db: Session, id: str, values: dict, orig_values: dict
+    ) -> None:
+        values["scope"] = convert_list_to_string(orig_values.get("scope", []))
+
+    def on_pre_update(
+        self, db: Session, db_obj: UserRole, values: dict, orig_values: dict
+    ) -> None:
+        values["scope"] = convert_list_to_string(orig_values.get("scope", []))
+
     def get_or_create(
         self,
         db: Session,
