@@ -88,7 +88,7 @@ _validate_bp_verification_state = validator(
 )(valid_bp_verification_state)
 
 
-def convert_perms_list_to_string(perms_list: List[str]) -> str:
+def convert_list_to_string(perms_list: List[str]) -> str:
     """Convert permissions list to string"""
     return ", ".join(map(str, set(perms_list))) if perms_list else ""
 
